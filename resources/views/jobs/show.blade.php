@@ -96,10 +96,15 @@
                     @endif
                 </p>
             </div>
-            <div class="lg:col-span-3 lg:text-right" id="confidence-badge-container">
-                @if($outputs)
-                    <x-confidence-badge :score="$outputs['structural_data']['confidence']['plddt_mean'] ?? 0" />
-                @endif
+            <div class="lg:col-span-3" id="quality-summary">
+                <div class="border border-ink-300 bg-ink-100/60 p-4">
+                    <div class="label-tag mb-2">tab. 0 · puntuación global</div>
+                    <div id="quality-summary-body">
+                        @if($outputs)
+                            <p class="font-mono text-[11px] text-ink-500">evaluando…</p>
+                        @endif
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -151,6 +156,24 @@
                     <canvas id="plddt-chart" class="w-full" height="120"></canvas>
                 </figure>
 
+                {{-- Secuencia interactiva --}}
+                <figure class="panel p-4 sm:p-5">
+                    <figcaption class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <span class="label-tag">fig. 2b · secuencia interactiva</span>
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">hover · inspeccionar · click · centrar visor</span>
+                    </figcaption>
+                    <div class="relative">
+                        <canvas id="sequence-track" class="w-full cursor-crosshair" height="44"></canvas>
+                        <canvas id="hydro-track" class="mt-1 w-full" height="12"></canvas>
+                        <div id="sequence-tooltip" class="pointer-events-none fixed z-50 hidden border border-ink-400 bg-ink-50 px-2 py-1 font-mono text-[10px] text-ink-900 shadow-lg"></div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-ink-500 sm:gap-4">
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2 w-2" style="background:#134e4a"></span>hidrofílico</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2 w-2" style="background:#b45309"></span>hidrofóbico</span>
+                        <span class="text-ink-400">· kyte-doolittle</span>
+                    </div>
+                </figure>
+
                 {{-- Mapa PAE --}}
                 <figure class="panel p-4 sm:p-5">
                     <figcaption class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -168,6 +191,19 @@
                             <span id="pae-max-label">30 Å</span>
                         </div>
                     </div>
+                </figure>
+
+                {{-- Mapa de contactos --}}
+                <figure class="panel p-4 sm:p-5">
+                    <figcaption class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <span class="label-tag">fig. 3b · mapa de contactos</span>
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">cα–cα &lt; 8 Å</span>
+                    </figcaption>
+                    <div class="relative mx-auto" style="max-width:440px">
+                        <canvas id="contact-map" class="w-full"></canvas>
+                        <div id="contact-map-tooltip" class="pointer-events-none fixed z-50 hidden border border-ink-400 bg-ink-50 px-2 py-1 font-mono text-[10px] text-ink-900 shadow-lg"></div>
+                    </div>
+                    <div id="contact-map-stats" class="mt-3 text-center font-mono text-[10px] uppercase tracking-wider text-ink-500"></div>
                 </figure>
             </div>
 
@@ -198,6 +234,14 @@
                     </div>
                 </section>
 
+                {{-- Regiones a inspeccionar --}}
+                <section class="panel p-4 sm:p-5">
+                    <div class="label-tag mb-4">tab. 5 · regiones a inspeccionar</div>
+                    <ul id="low-confidence-regions" class="space-y-2 font-mono text-[11px] text-ink-700">
+                        <li class="text-ink-400">cargando…</li>
+                    </ul>
+                </section>
+
                 {{-- Estructura secundaria --}}
                 <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">fig. 4 · estructura secundaria</div>
@@ -213,6 +257,70 @@
                     </div>
                 </section>
 
+                {{-- Referencias cruzadas --}}
+                @php
+                    $xrefMeta = $outputs['protein_metadata'] ?? [];
+                    $xrefUniprot = $xrefMeta['uniprot_id'] ?? null;
+                    $xrefPdb = $xrefMeta['pdb_id'] ?? null;
+                @endphp
+                <section class="panel p-4 sm:p-5">
+                    <div class="label-tag mb-4">tab. 4 · referencias cruzadas</div>
+                    @if($xrefUniprot || $xrefPdb)
+                        <ul class="space-y-2 font-mono text-[11px] text-ink-700">
+                            @if($xrefUniprot)
+                                <li>
+                                    <a href="https://www.uniprot.org/uniprotkb/{{ $xrefUniprot }}" target="_blank" rel="noopener"
+                                       class="flex items-center justify-between gap-2 border-b border-dashed border-ink-300 pb-1 hover:text-signal-mint">
+                                        <span class="text-ink-500">UniProt</span>
+                                        <span class="tabular-nums">{{ $xrefUniprot }} ↗</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://alphafold.ebi.ac.uk/entry/{{ $xrefUniprot }}" target="_blank" rel="noopener"
+                                       class="flex items-center justify-between gap-2 border-b border-dashed border-ink-300 pb-1 hover:text-signal-mint">
+                                        <span class="text-ink-500">AlphaFold DB</span>
+                                        <span>entrada ↗</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.ebi.ac.uk/interpro/protein/UniProt/{{ $xrefUniprot }}" target="_blank" rel="noopener"
+                                       class="flex items-center justify-between gap-2 border-b border-dashed border-ink-300 pb-1 hover:text-signal-mint">
+                                        <span class="text-ink-500">InterPro</span>
+                                        <span>dominios ↗</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.ebi.ac.uk/interpro/entry/pfam/search/?q={{ $xrefUniprot }}" target="_blank" rel="noopener"
+                                       class="flex items-center justify-between gap-2 border-b border-dashed border-ink-300 pb-1 hover:text-signal-mint">
+                                        <span class="text-ink-500">Pfam</span>
+                                        <span>búsqueda ↗</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @if($xrefPdb)
+                                <li>
+                                    <a href="https://www.rcsb.org/structure/{{ $xrefPdb }}" target="_blank" rel="noopener"
+                                       class="flex items-center justify-between gap-2 border-b border-dashed border-ink-300 pb-1 hover:text-signal-mint">
+                                        <span class="text-ink-500">RCSB PDB</span>
+                                        <span class="tabular-nums">{{ $xrefPdb }} ↗</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.ebi.ac.uk/pdbe/entry/pdb/{{ $xrefPdb }}" target="_blank" rel="noopener"
+                                       class="flex items-center justify-between gap-2 hover:text-signal-mint">
+                                        <span class="text-ink-500">PDBe</span>
+                                        <span class="tabular-nums">{{ $xrefPdb }} ↗</span>
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
+                    @else
+                        <p class="font-mono text-[11px] text-ink-400">
+                            sin identificadores externos · proteína custom
+                        </p>
+                    @endif
+                </section>
+
                 {{-- Descargas --}}
                 <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">descargas</div>
@@ -224,6 +332,22 @@
                         <button onclick="downloadFile('cif')" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
                             <span class="truncate">↓ structure.cif</span>
                             <span class="shrink-0 text-ink-400">mmcif</span>
+                        </button>
+                        <button onclick="downloadSequence()" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                            <span class="truncate">↓ sequence.fasta</span>
+                            <span class="shrink-0 text-ink-400">fasta</span>
+                        </button>
+                        <button onclick="downloadPlddtCsv()" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                            <span class="truncate">↓ plddt.csv</span>
+                            <span class="shrink-0 text-ink-400">csv</span>
+                        </button>
+                        <button onclick="downloadOutputsJson()" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                            <span class="truncate">↓ outputs.json</span>
+                            <span class="shrink-0 text-ink-400">json</span>
+                        </button>
+                        <button onclick="downloadSnapshot()" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                            <span class="truncate">↓ snapshot.png</span>
+                            <span class="shrink-0 text-ink-400">png</span>
                         </button>
                     </div>
                 </section>
@@ -304,9 +428,14 @@
 <script>
 // Estado global
 let viewer = null;
-let spinning = false;
+let spinning = true;
 let currentOutputs = @json($outputs);
 let currentAccounting = @json($accounting);
+let currentPdbString = null;
+let currentSequence = null;
+let currentResidues = null;      // [{resi, letter}]
+let currentCaCoords = null;       // Map<resi, [x,y,z]>
+let currentHighlightShape = null; // handle for 3Dmol addSphere overlay
 const jobId = @json($jobId);
 const initialStatus = @json($status['status'] ?? 'PENDING');
 
@@ -315,6 +444,30 @@ const PLDDT_COLORS = {
     high: '#65CBF3',
     medium: '#FFDB13',
     low: '#FF7D45',
+};
+
+// Estilos de botón de viewer (reutilizados por setViewerStyle y setBtnActive)
+const BTN_ACTIVE   = 'border border-signal-mint/40 bg-signal-mint/15 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-signal-mint-deep';
+const BTN_INACTIVE = 'border border-transparent px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 hover:border-ink-400 hover:text-ink-800';
+
+function setBtnActive(id, active) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.className = active ? BTN_ACTIVE : BTN_INACTIVE;
+}
+
+// Diccionario de aminoácidos 3→1 (estándar IUPAC + selenocisteína, pirrolisina, unknown)
+const AA_3_TO_1 = {
+    ALA: 'A', ARG: 'R', ASN: 'N', ASP: 'D', CYS: 'C', GLN: 'Q', GLU: 'E', GLY: 'G',
+    HIS: 'H', ILE: 'I', LEU: 'L', LYS: 'K', MET: 'M', PHE: 'F', PRO: 'P', SER: 'S',
+    THR: 'T', TRP: 'W', TYR: 'Y', VAL: 'V', SEC: 'U', PYL: 'O', UNK: 'X',
+};
+
+// Escala de hidrofobicidad Kyte-Doolittle
+const KYTE_DOOLITTLE = {
+    A: 1.8, R: -4.5, N: -3.5, D: -3.5, C: 2.5, Q: -3.5, E: -3.5, G: -0.4,
+    H: -3.2, I: 4.5, L: 3.8, K: -3.9, M: 1.9, F: 2.8, P: -1.6, S: -0.8,
+    T: -0.7, W: -0.9, Y: -1.3, V: 4.2, X: 0, U: 2.5, O: -3.9,
 };
 
 const FUN_FACTS = [
@@ -423,10 +576,19 @@ function renderResults() {
         document.getElementById('result-subtitle').innerHTML = sub;
     }
 
-    document.getElementById('confidence-badge-container').innerHTML = buildConfidenceBadge(confidence.plddt_mean);
+    renderQualitySummary();
 
-    // Esperar a un frame para que el layout esté asentado antes de inicializar el visor
-    requestAnimationFrame(() => init3DViewer(structural.pdb_file, confidence.plddt_per_residue, meta));
+    // Esperar a un frame para que el layout esté asentado antes de inicializar el visor.
+    // init3DViewer es async: extrae la secuencia del PDB resuelto, así que
+    // después tenemos que pintar la sequence/hydro tracks y el contact map.
+    requestAnimationFrame(async () => {
+        await init3DViewer(structural.pdb_file, confidence.plddt_per_residue, meta);
+        drawSequenceTrack();
+        drawHydrophobicityTrack();
+        drawContactMap();
+        wireSequenceTrackInteractions();
+        wireContactMapInteractions();
+    });
 
     drawPlddtChart(confidence.plddt_per_residue);
 
@@ -439,6 +601,7 @@ function renderResults() {
     renderPlddtHistogram(confidence.plddt_histogram);
 
     renderBioData(bio);
+    renderLowConfidenceRegions(confidence.plddt_per_residue);
 
     if (bio.secondary_structure_prediction) {
         drawSecondaryStructureChart(bio.secondary_structure_prediction);
@@ -565,6 +728,14 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
             : `procedencia · ${source}`;
     }
 
+    // Extraer secuencia, residuos y coords Cα del PDB resuelto — lo usan la
+    // sequence track, el contact map y el highlight bidireccional.
+    currentPdbString = resolvedPdb;
+    const extracted = extractPdbData(resolvedPdb);
+    currentSequence = extracted.sequence;
+    currentResidues = extracted.residues;
+    currentCaCoords = extracted.caCoords;
+
     try {
         viewer = $3Dmol.createViewer(container, {
             backgroundColor: 'white',
@@ -608,15 +779,23 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
             label.textContent =
                 `${atom.resn || ''}${atom.resi || ''} · ${atom.atom || ''}` +
                 (plddt !== undefined ? ` · pLDDT ${plddt.toFixed(1)}` : '');
+            // Resalta la celda correspondiente en la sequence track
+            highlightSequenceCell(atom.resi);
         },
         function () {
             const label = document.getElementById('viewer-hover');
             if (label) label.innerHTML = '&nbsp;';
+            clearSequenceHighlight();
         }
     );
 
     viewer.zoomTo();
     viewer.render();
+
+    // Arranca el spin por defecto. El botón se marca como activo.
+    viewer.spin(true);
+    spinning = true;
+    setBtnActive('btn-spin', true);
 
     // Forzar resize tras render — soluciona el bug de canvas vacío en algunos layouts
     requestAnimationFrame(() => {
@@ -1044,19 +1223,494 @@ function buildConfidenceBadge(score) {
 }
 
 // ====== DESCARGAS ======
+function downloadBlob(content, filename, mime = 'text/plain') {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function downloadDataUri(dataUri, filename) {
+    const a = document.createElement('a');
+    a.href = dataUri;
+    a.download = filename;
+    a.click();
+}
+
 function downloadFile(type) {
     if (!currentOutputs) return;
     const content = type === 'pdb'
         ? currentOutputs.structural_data.pdb_file
         : currentOutputs.structural_data.cif_file;
     if (!content) return;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `structure.${type === 'pdb' ? 'pdb' : 'cif'}`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `structure.${type}`, 'text/plain');
+}
+
+function downloadSequence() {
+    if (!currentSequence) return;
+    const name = currentOutputs?.protein_metadata?.protein_name || 'protein';
+    const safe = String(name).replace(/[^a-zA-Z0-9_\-]/g, '_');
+    downloadBlob(`>${safe}\n${currentSequence}\n`, 'sequence.fasta', 'text/plain');
+}
+
+function downloadPlddtCsv() {
+    const arr = currentOutputs?.structural_data?.confidence?.plddt_per_residue;
+    if (!Array.isArray(arr)) return;
+    const lines = ['residue,plddt'];
+    arr.forEach((p, i) => lines.push(`${i + 1},${p}`));
+    downloadBlob(lines.join('\n') + '\n', 'plddt.csv', 'text/csv');
+}
+
+function downloadOutputsJson() {
+    if (!currentOutputs) return;
+    downloadBlob(JSON.stringify(currentOutputs, null, 2), 'outputs.json', 'application/json');
+}
+
+function downloadSnapshot() {
+    if (!viewer) return;
+    try {
+        const uri = viewer.pngURI();
+        downloadDataUri(uri, 'snapshot.png');
+    } catch (e) {
+        console.warn('pngURI failed:', e);
+    }
+}
+
+// ====== HERRAMIENTAS DE INVESTIGACIÓN ======
+// Parseo de PDB: extrae sequence, residuos y coords Cα en una sola pasada.
+function extractPdbData(pdb) {
+    const residues = [];
+    const caCoords = new Map();
+    if (!pdb) return { sequence: '', residues, caCoords };
+    const seen = new Set();
+    for (const line of pdb.split('\n')) {
+        if (!line.startsWith('ATOM') || line.length < 54) continue;
+        const name = line.substring(12, 16).trim();
+        if (name !== 'CA') continue;
+        const resi = parseInt(line.substring(22, 26).trim(), 10);
+        if (!Number.isFinite(resi) || seen.has(resi)) continue;
+        const x = parseFloat(line.substring(30, 38));
+        const y = parseFloat(line.substring(38, 46));
+        const z = parseFloat(line.substring(46, 54));
+        if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) continue;
+        seen.add(resi);
+        const resName = line.substring(17, 20).trim().toUpperCase();
+        residues.push({ resi, letter: AA_3_TO_1[resName] || 'X' });
+        caCoords.set(resi, [x, y, z]);
+    }
+    residues.sort((a, b) => a.resi - b.resi);
+    return { sequence: residues.map(r => r.letter).join(''), residues, caCoords };
+}
+
+// pLDDT → color hex de la paleta AlphaFold canónica.
+function plddtColor(p) {
+    if (p == null) return '#cdc6b0';
+    if (p >= 90) return PLDDT_COLORS.veryHigh;
+    if (p >= 70) return PLDDT_COLORS.high;
+    if (p >= 50) return PLDDT_COLORS.medium;
+    return PLDDT_COLORS.low;
+}
+
+// Interpolación lineal entre dos colores hex (#rrggbb).
+function mixHex(hex1, hex2, t) {
+    const a = parseInt(hex1.slice(1), 16);
+    const b = parseInt(hex2.slice(1), 16);
+    const r = Math.round(((a >> 16) & 0xff) * (1 - t) + ((b >> 16) & 0xff) * t);
+    const g = Math.round(((a >> 8) & 0xff) * (1 - t) + ((b >> 8) & 0xff) * t);
+    const bl = Math.round((a & 0xff) * (1 - t) + (b & 0xff) * t);
+    return `rgb(${r},${g},${bl})`;
+}
+
+// ------ Quality Summary ------
+function buildQualitySummary(confidence, bio) {
+    const plddt = confidence?.plddt_mean ?? 0;
+    const meanPae = confidence?.mean_pae ?? 30;
+    const paeScore = Math.max(0, 100 - Math.min(meanPae, 30) / 30 * 100);
+    const bioPenalty =
+          (bio?.stability_status === 'unstable' ? 15 : 0)
+        + (bio?.toxicity_alerts && bio.toxicity_alerts.length ? 10 : 0)
+        + (bio?.allergenicity_alerts && bio.allergenicity_alerts.length ? 5 : 0);
+    const bioScore = Math.max(0, 100 - bioPenalty);
+    const score = Math.round(plddt * 0.5 + paeScore * 0.3 + bioScore * 0.2);
+    const tier =
+        score >= 85 ? { label: 'muy alta', color: PLDDT_COLORS.veryHigh } :
+        score >= 70 ? { label: 'alta',     color: PLDDT_COLORS.high } :
+        score >= 50 ? { label: 'media',    color: PLDDT_COLORS.medium } :
+                      { label: 'baja',     color: PLDDT_COLORS.low };
+    return { score, tier, plddt, meanPae, bioOk: bioPenalty === 0 };
+}
+
+function renderQualitySummary() {
+    const target = document.getElementById('quality-summary-body');
+    if (!target || !currentOutputs) return;
+    const q = buildQualitySummary(
+        currentOutputs.structural_data?.confidence || {},
+        currentOutputs.biological_data || {},
+    );
+    target.innerHTML = `
+        <div class="flex items-baseline justify-center gap-2">
+            <span class="font-serif text-[40px] leading-none text-ink-900 tabular-nums">${q.score}</span>
+            <span class="font-mono text-[11px] uppercase tracking-wider text-ink-500">/ 100</span>
+        </div>
+        <div class="mt-1 flex items-center justify-center gap-1.5 font-mono text-[10px] uppercase tracking-wider"
+             style="color:${q.tier.color}">
+            <span class="inline-block h-1.5 w-1.5 rounded-full" style="background:${q.tier.color}"></span>
+            ${q.tier.label}
+        </div>
+        <div class="mt-3 space-y-1 border-t border-ink-300 pt-2 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+            <div class="flex justify-between"><span>pLDDT</span><span class="text-ink-800 tabular-nums">${q.plddt.toFixed(1)}</span></div>
+            <div class="flex justify-between"><span>PAE</span><span class="text-ink-800 tabular-nums">${q.meanPae.toFixed(1)} Å</span></div>
+            <div class="flex justify-between"><span>bio</span><span class="${q.bioOk ? 'text-signal-mint-deep' : 'text-signal-rust'}">${q.bioOk ? 'sin alertas' : 'con alertas'}</span></div>
+        </div>
+    `;
+}
+
+// ------ Sequence Track + Hydrophobicity ------
+function drawSequenceTrack() {
+    const canvas = document.getElementById('sequence-track');
+    if (!canvas || !currentSequence || !currentResidues) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || canvas.parentElement.clientWidth || 600;
+    const cssH = 44;
+    canvas.width  = cssW * dpr;
+    canvas.height = cssH * dpr;
+    canvas.style.height = cssH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const plddt = currentOutputs?.structural_data?.confidence?.plddt_per_residue || [];
+    const n = currentSequence.length;
+    if (n === 0) return;
+    const cellW = cssW / n;
+    const cellH = 28;
+
+    for (let i = 0; i < n; i++) {
+        const p = plddt[i] != null ? plddt[i] : 0;
+        ctx.fillStyle = plddtColor(p);
+        ctx.fillRect(i * cellW, 0, Math.max(1, cellW + 0.5), cellH);
+
+        if (cellW >= 10) {
+            ctx.fillStyle = p >= 70 ? '#ffffff' : '#16140e';
+            ctx.font = '600 10px "IBM Plex Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(currentSequence[i], i * cellW + cellW / 2, cellH / 2);
+        }
+    }
+
+    // Numeración cada N residuos
+    ctx.fillStyle = '#7a7461';
+    ctx.font = '9px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const step = n <= 50 ? 10 : n <= 200 ? 20 : 50;
+    for (let i = step; i < n; i += step) {
+        const resi = currentResidues[i]?.resi ?? (i + 1);
+        ctx.fillText(String(resi), i * cellW, cellH + 2);
+    }
+}
+
+function drawHydrophobicityTrack() {
+    const canvas = document.getElementById('hydro-track');
+    if (!canvas || !currentSequence) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || canvas.parentElement.clientWidth || 600;
+    const cssH = 12;
+    canvas.width  = cssW * dpr;
+    canvas.height = cssH * dpr;
+    canvas.style.height = cssH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const n = currentSequence.length;
+    if (n === 0) return;
+    const cellW = cssW / n;
+    for (let i = 0; i < n; i++) {
+        const h = KYTE_DOOLITTLE[currentSequence[i]] ?? 0;
+        const t = Math.max(0, Math.min(1, (h + 4.5) / 9));
+        ctx.fillStyle = mixHex('#134e4a', '#b45309', t);
+        ctx.fillRect(i * cellW, 0, Math.max(1, cellW + 0.5), cssH);
+    }
+}
+
+// ------ Sequence ↔ 3D bridge ------
+function indexFromCanvasX(canvas, pageX) {
+    const rect = canvas.getBoundingClientRect();
+    const x = pageX - rect.left;
+    const n = currentSequence ? currentSequence.length : 0;
+    if (n === 0) return -1;
+    const idx = Math.floor((x / rect.width) * n);
+    return Math.max(0, Math.min(n - 1, idx));
+}
+
+function highlightResidue3D(resi) {
+    if (!viewer || !currentCaCoords) return;
+    const coords = currentCaCoords.get(resi);
+    if (!coords) return;
+    clearResidue3DHighlight();
+    try {
+        currentHighlightShape = viewer.addSphere({
+            center: { x: coords[0], y: coords[1], z: coords[2] },
+            radius: 2.2,
+            color: '#0d9488',
+            opacity: 0.8,
+        });
+        viewer.render();
+    } catch (e) { /* noop */ }
+}
+
+function clearResidue3DHighlight() {
+    if (!viewer || !currentHighlightShape) return;
+    try {
+        viewer.removeShape(currentHighlightShape);
+        viewer.render();
+    } catch (e) { /* noop */ }
+    currentHighlightShape = null;
+}
+
+function focusResidueRange(start, end) {
+    if (!viewer) return;
+    const resis = [];
+    for (let i = start; i <= end; i++) resis.push(i);
+    try {
+        viewer.zoomTo({ resi: resis });
+        viewer.render();
+    } catch (e) { /* noop */ }
+}
+
+// Overlay mint para resaltar la celda correspondiente a un residuo desde el visor 3D.
+let _sequenceHighlightOverlay = null;
+function highlightSequenceCell(resi) {
+    if (!currentResidues || !currentSequence) return;
+    const idx = currentResidues.findIndex(r => r.resi === resi);
+    if (idx < 0) return;
+    const canvas = document.getElementById('sequence-track');
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cellW = rect.width / currentSequence.length;
+    if (!_sequenceHighlightOverlay) {
+        _sequenceHighlightOverlay = document.createElement('div');
+        _sequenceHighlightOverlay.className = 'pointer-events-none absolute border-2 border-signal-mint';
+        _sequenceHighlightOverlay.style.top = '0';
+        _sequenceHighlightOverlay.style.height = '28px';
+        canvas.parentElement.appendChild(_sequenceHighlightOverlay);
+    }
+    _sequenceHighlightOverlay.style.display = 'block';
+    _sequenceHighlightOverlay.style.left = (idx * cellW) + 'px';
+    _sequenceHighlightOverlay.style.width = Math.max(2, cellW) + 'px';
+}
+
+function clearSequenceHighlight() {
+    if (_sequenceHighlightOverlay) {
+        _sequenceHighlightOverlay.style.display = 'none';
+    }
+}
+
+function showSequenceTooltip(idx, pageX, pageY) {
+    const tip = document.getElementById('sequence-tooltip');
+    if (!tip) return;
+    const letter = currentSequence[idx];
+    const resi = currentResidues[idx]?.resi ?? (idx + 1);
+    const plddt = currentOutputs?.structural_data?.confidence?.plddt_per_residue?.[idx];
+    const hydro = KYTE_DOOLITTLE[letter] ?? 0;
+    tip.textContent = `${letter}${resi} · pLDDT ${plddt != null ? plddt.toFixed(1) : '—'} · KD ${hydro.toFixed(1)}`;
+    tip.style.left = (pageX + 12) + 'px';
+    tip.style.top  = (pageY + 12) + 'px';
+    tip.classList.remove('hidden');
+}
+
+function hideSequenceTooltip() {
+    const tip = document.getElementById('sequence-tooltip');
+    if (tip) tip.classList.add('hidden');
+}
+
+function wireSequenceTrackInteractions() {
+    const canvas = document.getElementById('sequence-track');
+    if (!canvas || canvas.dataset.wired) return;
+    canvas.dataset.wired = '1';
+
+    canvas.addEventListener('mousemove', (e) => {
+        const idx = indexFromCanvasX(canvas, e.clientX);
+        if (idx < 0) return;
+        showSequenceTooltip(idx, e.clientX, e.clientY);
+        const resi = currentResidues[idx]?.resi;
+        if (resi != null) highlightResidue3D(resi);
+    });
+    canvas.addEventListener('mouseleave', () => {
+        hideSequenceTooltip();
+        clearResidue3DHighlight();
+    });
+    canvas.addEventListener('click', (e) => {
+        const idx = indexFromCanvasX(canvas, e.clientX);
+        if (idx < 0) return;
+        const resi = currentResidues[idx]?.resi;
+        if (resi != null) focusResidueRange(resi, resi);
+    });
+}
+
+// ------ Contact Map ------
+function computeContactMap(threshold = 8) {
+    if (!currentCaCoords || currentCaCoords.size === 0) return null;
+    const entries = [...currentCaCoords.entries()].sort((a, b) => a[0] - b[0]);
+    const n = entries.length;
+    const contacts = new Array(n);
+    for (let i = 0; i < n; i++) contacts[i] = new Uint8Array(n);
+    let count = 0;
+    const t2 = threshold * threshold;
+    for (let i = 0; i < n; i++) {
+        const a = entries[i][1];
+        for (let j = i + 1; j < n; j++) {
+            const b = entries[j][1];
+            const dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
+            if (dx * dx + dy * dy + dz * dz < t2) {
+                contacts[i][j] = 1;
+                contacts[j][i] = 1;
+                count++;
+            }
+        }
+    }
+    const resiList = entries.map(e => e[0]);
+    const density = n > 0 ? (2 * count) / (n * n) : 0;
+    return { n, contacts, count, density, resiList };
+}
+
+function drawContactMap() {
+    const canvas = document.getElementById('contact-map');
+    const stats = document.getElementById('contact-map-stats');
+    if (!canvas) return;
+    const data = computeContactMap(8);
+    if (!data || data.n === 0) {
+        canvas.style.display = 'none';
+        if (stats) stats.textContent = 'sin coordenadas suficientes para el mapa';
+        return;
+    }
+    canvas.style.display = 'block';
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = Math.min(canvas.clientWidth || 400, 440);
+    const size = cssW;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    canvas.style.height = size + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    ctx.fillStyle = '#faf7ee';
+    ctx.fillRect(0, 0, size, size);
+
+    const cell = size / data.n;
+    ctx.fillStyle = 'rgba(22, 20, 14, 0.88)';
+    for (let i = 0; i < data.n; i++) {
+        for (let j = 0; j < data.n; j++) {
+            if (data.contacts[i][j]) {
+                ctx.fillRect(j * cell, i * cell, Math.max(1, cell), Math.max(1, cell));
+            }
+        }
+    }
+
+    // Diagonal suave como referencia visual
+    ctx.strokeStyle = 'rgba(13, 148, 136, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(size, size);
+    ctx.stroke();
+
+    if (stats) {
+        stats.textContent = `densidad ${(data.density * 100).toFixed(1)}% · ${data.count} contactos · threshold 8 Å`;
+    }
+
+    canvas._contactMapData = data;
+}
+
+function wireContactMapInteractions() {
+    const canvas = document.getElementById('contact-map');
+    const tip = document.getElementById('contact-map-tooltip');
+    if (!canvas || !tip || canvas.dataset.wired) return;
+    canvas.dataset.wired = '1';
+
+    canvas.addEventListener('mousemove', (e) => {
+        const data = canvas._contactMapData;
+        if (!data) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const cell = rect.width / data.n;
+        const j = Math.max(0, Math.min(data.n - 1, Math.floor(x / cell)));
+        const i = Math.max(0, Math.min(data.n - 1, Math.floor(y / cell)));
+        const resiA = data.resiList[i];
+        const resiB = data.resiList[j];
+        const coordsA = currentCaCoords.get(resiA);
+        const coordsB = currentCaCoords.get(resiB);
+        let dist = null;
+        if (coordsA && coordsB) {
+            const dx = coordsA[0] - coordsB[0], dy = coordsA[1] - coordsB[1], dz = coordsA[2] - coordsB[2];
+            dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+        tip.textContent = `res ${resiA} ↔ ${resiB}` + (dist != null ? ` · ${dist.toFixed(2)} Å` : '');
+        tip.style.left = (e.clientX + 12) + 'px';
+        tip.style.top  = (e.clientY + 12) + 'px';
+        tip.classList.remove('hidden');
+    });
+    canvas.addEventListener('mouseleave', () => tip.classList.add('hidden'));
+}
+
+// ------ Low Confidence Regions ------
+function detectLowConfidenceRegions(plddtArr, threshold = 70) {
+    if (!Array.isArray(plddtArr)) return [];
+    const regions = [];
+    let start = null;
+    let sum = 0;
+    let cnt = 0;
+    for (let i = 0; i < plddtArr.length; i++) {
+        const p = plddtArr[i];
+        if (p < threshold) {
+            if (start === null) { start = i + 1; sum = 0; cnt = 0; }
+            sum += p;
+            cnt++;
+        } else if (start !== null) {
+            regions.push({ start, end: i, mean: cnt > 0 ? sum / cnt : 0 });
+            start = null;
+        }
+    }
+    if (start !== null) {
+        regions.push({ start, end: plddtArr.length, mean: cnt > 0 ? sum / cnt : 0 });
+    }
+    return regions.slice(0, 10);
+}
+
+function renderLowConfidenceRegions(plddtArr) {
+    const target = document.getElementById('low-confidence-regions');
+    if (!target) return;
+    const regions = detectLowConfidenceRegions(plddtArr);
+    if (regions.length === 0) {
+        target.innerHTML = '<li class="text-ink-400">estructura uniformemente fiable — ningún residuo &lt; 70</li>';
+        return;
+    }
+    target.innerHTML = regions.map((r) => {
+        const label = r.start === r.end ? `${r.start}` : `${r.start}–${r.end}`;
+        return `
+            <li class="flex items-center justify-between gap-2 border-b border-dashed border-ink-300 pb-1 last:border-b-0">
+                <span class="flex items-baseline gap-2">
+                    <span class="text-ink-800 tabular-nums">${label}</span>
+                    <span class="text-ink-500">pLDDT ${r.mean.toFixed(1)}</span>
+                </span>
+                <button type="button" data-start="${r.start}" data-end="${r.end}"
+                        class="text-signal-mint hover:underline">→ centrar</button>
+            </li>`;
+    }).join('');
+    target.querySelectorAll('button[data-start]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const s = parseInt(btn.dataset.start, 10);
+            const e = parseInt(btn.dataset.end, 10);
+            if (Number.isFinite(s) && Number.isFinite(e)) focusResidueRange(s, e);
+        });
+    });
 }
 
 // ====== ANÁLISIS IA ======

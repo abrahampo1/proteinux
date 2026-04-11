@@ -8,7 +8,7 @@ HPC (SLURM, CUDA, entornos, bases de datos masivas) y le devuelve al
 investigador una estructura 3D interactiva, métricas de confianza, propiedades
 biológicas y un análisis interpretativo generado por IA.
 
-Construido para **IMPACTHON 2026** / Cátedra CAMELIA de Medicina Personalizada.
+Construido para **[IMPACTHON 2026](https://impacthon-web.vercel.app)** / Cátedra CAMELIA de Medicina Personalizada.
 
 ---
 
@@ -242,7 +242,7 @@ POST /api/jobs/{jobId}/ai-chat      chat Q&A sobre el job
   de Galicia (Finis Terrae III)
 - **Respaldo académico**: Cátedra CAMELIA de Medicina Personalizada,
   [CiTIUS](https://citius.gal)
-- **Contexto**: IMPACTHON 2026 · Xunta de Galicia
+- **Contexto**: [IMPACTHON 2026](https://impacthon-web.vercel.app) · Xunta de Galicia
 - **Modelo de predicción**: AlphaFold2 (DeepMind · EMBL-EBI)
 - **Visor 3D**: [3Dmol.js](https://3dmol.csb.pitt.edu/)
 - **Framework**: [Laravel](https://laravel.com)

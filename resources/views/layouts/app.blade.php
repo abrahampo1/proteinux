@@ -47,7 +47,7 @@
             <div class="flex shrink-0 items-center gap-2 sm:gap-4">
                 <span class="hidden sm:inline">{{ now()->format('Y-m-d') }}<span class="text-ink-400"> · </span>{{ now()->format('H:i') }} <span class="text-ink-400">utc</span></span>
                 <span class="hidden text-ink-400 sm:inline">|</span>
-                <span>impacthon <span class="text-signal-mint">2026</span></span>
+                <a href="https://impacthon-web.vercel.app" target="_blank" rel="noopener" class="transition-colors hover:text-ink-900">impacthon <span class="text-signal-mint">2026</span></a>
             </div>
         </div>
     </div>
@@ -145,7 +145,7 @@
             <div class="grid gap-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-ink-500 sm:grid-cols-3 sm:gap-6">
                 <div>
                     <div class="text-ink-800">proteinux</div>
-                    <div class="mt-1">impacthon 2026 · cátedra camelia</div>
+                    <div class="mt-1"><a href="https://impacthon-web.vercel.app" target="_blank" rel="noopener" class="transition-colors hover:text-ink-900">impacthon 2026</a> · cátedra camelia</div>
                     <div class="mt-1">medicina personalizada</div>
                 </div>
                 <div>

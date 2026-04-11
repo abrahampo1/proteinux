@@ -40,7 +40,7 @@
             {{-- Línea tipo paper --}}
             <div class="mt-8 border-t border-ink-300 pt-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-ink-500 sm:mt-10">
                 <div>cátedra camelia · medicina personalizada</div>
-                <div class="mt-1">impacthon 2026 · galicia, españa · acceso abierto</div>
+                <div class="mt-1"><a href="https://impacthon-web.vercel.app" target="_blank" rel="noopener" class="transition-colors hover:text-ink-800">impacthon 2026</a> · galicia, españa · acceso abierto</div>
             </div>
         </div>
 

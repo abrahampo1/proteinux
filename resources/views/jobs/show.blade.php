@@ -399,50 +399,79 @@ function renderResults() {
 }
 
 // ====== VISOR 3D ======
-// pLDDT global (se usa dentro de colorfunc y tras fetch del PDB real)
 let currentPlddt = null;
+// El PDB en uso puede ser solo Cα (simulador) o backbone completo (RCSB).
+// Cambia el estilo por defecto de cartoon y evita stick que no podría renderizar.
+let currentPdbIsCaOnly = false;
 
 /**
- * Cuenta cuántos residuos tiene una cadena PDB contando las líneas ATOM
- * con átomo CA (una por residuo).
+ * Analiza una cadena PDB y devuelve {residues, caOnly}.
+ * caOnly = true cuando todos los ATOM presentes son Cα — es lo que devuelve
+ * el mock del simulador para secuencias custom. Un PDB así NO puede
+ * renderizarse con cartoon/rectangle ni con stick porque 3Dmol necesita
+ * backbone (N, C, O) para construir el ribbon y enlaces inferidos para
+ * los sticks.
  */
-function countResiduesInPdb(pdbString) {
-    if (!pdbString) return 0;
-    let count = 0;
-    const lines = pdbString.split('\n');
-    for (const line of lines) {
-        if (line.startsWith('ATOM') && line.substring(12, 16).trim() === 'CA') {
-            count++;
-        }
+function analyzePdb(pdbString) {
+    if (!pdbString) return { residues: 0, caOnly: false };
+    let caCount = 0;
+    let nonCaAtoms = 0;
+    for (const line of pdbString.split('\n')) {
+        if (!line.startsWith('ATOM')) continue;
+        // Un ATOM válido mide al menos 54 chars (hasta coords z). Las líneas
+        // tipo "ATOM    X Y Z CONF" del simulador son cabeceras y se descartan.
+        if (line.length < 54) continue;
+        const name = line.substring(12, 16).trim();
+        if (!name) continue;
+        // Requerimos que haya coords numéricas parseables, si no, no es ATOM real.
+        const x = parseFloat(line.substring(30, 38));
+        if (!Number.isFinite(x)) continue;
+        if (name === 'CA') caCount++;
+        else nonCaAtoms++;
     }
-    return count;
+    return {
+        residues: caCount,
+        caOnly: caCount > 0 && nonCaAtoms === 0,
+    };
 }
 
 /**
- * Si la metadata tiene pdb_id, intenta descargar la estructura canónica de
- * RCSB PDB. Es la misma práctica que usan los visores de AlphaFold / UniProt:
- * mostrar la estructura experimental como referencia cuando está disponible.
- * Si falla, devuelve el PDB local.
+ * Si la metadata tiene pdb_id y el PDB local es trivial o solo Cα, se
+ * descarga la estructura canónica de RCSB PDB (CORS abierto). Es la misma
+ * práctica que usan AlphaFold DB y UniProt: mostrar la estructura
+ * experimental cuando está disponible.
  */
 async function resolvePdbSource(localPdb, metadata) {
     const pdbId = metadata && metadata.pdb_id;
-    const localResidues = countResiduesInPdb(localPdb);
+    const info = analyzePdb(localPdb);
+    const needsFallback = info.residues < 20 || info.caOnly;
 
-    // Si el PDB local ya tiene bastantes residuos, úsalo directamente.
-    if (localResidues >= 20 || !pdbId) {
-        return { pdb: localPdb, source: pdbId ? `pdb ${pdbId} · simulador` : 'simulador cesga' };
+    if (!needsFallback || !pdbId) {
+        return {
+            pdb: localPdb,
+            caOnly: info.caOnly,
+            source: pdbId ? `pdb ${pdbId} · simulador` : 'simulador cesga',
+        };
     }
 
-    // El PDB del simulador es un stub — pedimos el real a RCSB.
     try {
         const url = `https://files.rcsb.org/download/${encodeURIComponent(pdbId)}.pdb`;
         const resp = await fetch(url, { mode: 'cors' });
         if (!resp.ok) throw new Error(`rcsb ${resp.status}`);
         const realPdb = await resp.text();
-        return { pdb: realPdb, source: `pdb ${pdbId} · rcsb · estructura experimental` };
+        const realInfo = analyzePdb(realPdb);
+        return {
+            pdb: realPdb,
+            caOnly: realInfo.caOnly,
+            source: `pdb ${pdbId} · rcsb · estructura experimental`,
+        };
     } catch (err) {
         console.warn('No se pudo descargar el PDB real desde RCSB, usando el local:', err);
-        return { pdb: localPdb, source: `${pdbId} · fallback local` };
+        return {
+            pdb: localPdb,
+            caOnly: info.caOnly,
+            source: `${pdbId} · fallback local`,
+        };
     }
 }
 
@@ -470,8 +499,13 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
     const sourceLabel = document.getElementById('viewer-source');
     if (sourceLabel) sourceLabel.textContent = 'procedencia · descargando pdb real…';
 
-    const { pdb: resolvedPdb, source } = await resolvePdbSource(pdbString, metadata);
-    if (sourceLabel) sourceLabel.textContent = `procedencia · ${source}`;
+    const { pdb: resolvedPdb, source, caOnly } = await resolvePdbSource(pdbString, metadata);
+    currentPdbIsCaOnly = !!caOnly;
+    if (sourceLabel) {
+        sourceLabel.textContent = caOnly
+            ? `procedencia · ${source} · traza cα`
+            : `procedencia · ${source}`;
+    }
 
     try {
         viewer = $3Dmol.createViewer(container, {
@@ -594,27 +628,47 @@ function setViewerStyle(style) {
     });
 
     const scheme = plddtColorscheme();
+    // Para traza Cα usamos el estilo 'trace' (tubo a lo largo de CAs) —
+    // 'rectangle' requiere N, C, O para construir el ribbon. También
+    // desactivamos las flechas porque no hay láminas β detectables.
+    const cartoonStyleName = currentPdbIsCaOnly ? 'trace' : 'rectangle';
+    const cartoonArrows = !currentPdbIsCaOnly;
 
     if (style === 'cartoon') {
         viewer.setStyle({ hetflag: false }, {
             cartoon: {
                 colorscheme: scheme,
                 thickness: 0.4,
-                arrows: true,
-                style: 'rectangle',
+                arrows: cartoonArrows,
+                style: cartoonStyleName,
                 opacity: 1.0,
             },
         });
     } else if (style === 'stick') {
-        viewer.setStyle({ hetflag: false }, {
-            stick: { colorscheme: scheme, radius: 0.22 },
-            cartoon: {
-                colorscheme: scheme,
-                thickness: 0.15,
-                opacity: 0.35,
-                style: 'rectangle',
-            },
-        });
+        if (currentPdbIsCaOnly) {
+            // Sin backbone no hay enlaces → stick invisible. Caemos a una
+            // traza Cα con cilindros gruesos + esferas pequeñas en los CAs,
+            // que es lo que realmente espera ver el usuario al pulsar
+            // "varilla" sobre un modelo de solo Cα.
+            viewer.setStyle({ hetflag: false }, {
+                cartoon: {
+                    colorscheme: scheme,
+                    thickness: 0.5,
+                    style: 'trace',
+                },
+                sphere: { colorscheme: scheme, radius: 0.55 },
+            });
+        } else {
+            viewer.setStyle({ hetflag: false }, {
+                stick: { colorscheme: scheme, radius: 0.22 },
+                cartoon: {
+                    colorscheme: scheme,
+                    thickness: 0.15,
+                    opacity: 0.35,
+                    style: 'rectangle',
+                },
+            });
+        }
     } else if (style === 'sphere') {
         viewer.setStyle({ hetflag: false }, {
             sphere: { colorscheme: scheme, scale: 0.32 },
@@ -624,8 +678,8 @@ function setViewerStyle(style) {
             cartoon: {
                 colorscheme: scheme,
                 thickness: 0.4,
-                arrows: true,
-                style: 'rectangle',
+                arrows: cartoonArrows,
+                style: cartoonStyleName,
             },
         });
         viewer.addSurface(

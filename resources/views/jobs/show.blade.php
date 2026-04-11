@@ -96,15 +96,10 @@
                     @endif
                 </p>
             </div>
-            <div class="lg:col-span-3" id="quality-summary">
-                <div class="border border-ink-300 bg-ink-100/60 p-4">
-                    <div class="label-tag mb-2">tab. 0 · puntuación global</div>
-                    <div id="quality-summary-body">
-                        @if($outputs)
-                            <p class="font-mono text-[11px] text-ink-500">evaluando…</p>
-                        @endif
-                    </div>
-                </div>
+            <div class="lg:col-span-3 lg:text-right" id="quality-header">
+                @if($outputs)
+                    <x-confidence-badge :score="$outputs['structural_data']['confidence']['plddt_mean'] ?? 0" />
+                @endif
             </div>
         </header>
 
@@ -213,6 +208,7 @@
                 {{-- Resumen de confianza --}}
                 <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">tab. 1 · resumen de confianza</div>
+                    <div id="quality-score-block" class="mb-4 hidden"></div>
                     <dl class="space-y-0" id="confidence-summary">
                         <div class="field">
                             <dt>pLDDT promedio</dt>
@@ -1344,28 +1340,44 @@ function buildQualitySummary(confidence, bio) {
 }
 
 function renderQualitySummary() {
-    const target = document.getElementById('quality-summary-body');
-    if (!target || !currentOutputs) return;
+    if (!currentOutputs) return;
     const q = buildQualitySummary(
         currentOutputs.structural_data?.confidence || {},
         currentOutputs.biological_data || {},
     );
-    target.innerHTML = `
-        <div class="flex items-baseline justify-center gap-2">
-            <span class="font-serif text-[40px] leading-none text-ink-900 tabular-nums">${q.score}</span>
-            <span class="font-mono text-[11px] uppercase tracking-wider text-ink-500">/ 100</span>
-        </div>
-        <div class="mt-1 flex items-center justify-center gap-1.5 font-mono text-[10px] uppercase tracking-wider"
-             style="color:${q.tier.color}">
-            <span class="inline-block h-1.5 w-1.5 rounded-full" style="background:${q.tier.color}"></span>
-            ${q.tier.label}
-        </div>
-        <div class="mt-3 space-y-1 border-t border-ink-300 pt-2 font-mono text-[10px] uppercase tracking-wider text-ink-500">
-            <div class="flex justify-between"><span>pLDDT</span><span class="text-ink-800 tabular-nums">${q.plddt.toFixed(1)}</span></div>
-            <div class="flex justify-between"><span>PAE</span><span class="text-ink-800 tabular-nums">${q.meanPae.toFixed(1)} Å</span></div>
-            <div class="flex justify-between"><span>bio</span><span class="${q.bioOk ? 'text-signal-mint-deep' : 'text-signal-rust'}">${q.bioOk ? 'sin alertas' : 'con alertas'}</span></div>
-        </div>
-    `;
+
+    // Header: pequeño badge compacto de pLDDT (un solo vistazo).
+    const header = document.getElementById('quality-header');
+    if (header) {
+        header.innerHTML = buildConfidenceBadge(q.plddt);
+    }
+
+    // Sidebar: bloque destacado dentro de "tab. 1 · resumen de confianza".
+    // Muestra la puntuación global (0-100) y el tier; los desgloses
+    // por métrica siguen viéndose en la <dl> inmediatamente debajo.
+    const block = document.getElementById('quality-score-block');
+    if (block) {
+        block.classList.remove('hidden');
+        block.innerHTML = `
+            <div class="border-b border-dashed border-ink-300 pb-4">
+                <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">puntuación global</div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="font-serif text-[44px] leading-none text-ink-900 tabular-nums">${q.score}</span>
+                    <span class="font-mono text-[11px] uppercase tracking-wider text-ink-500">/ 100</span>
+                    <span class="ml-auto flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider"
+                          style="color:${q.tier.color}">
+                        <span class="inline-block h-1.5 w-1.5 rounded-full" style="background:${q.tier.color}"></span>
+                        ${q.tier.label}
+                    </span>
+                </div>
+                ${q.bioOk ? '' : `
+                    <div class="mt-2 font-mono text-[10px] uppercase tracking-wider text-signal-rust">
+                        · alertas biológicas detectadas
+                    </div>
+                `}
+            </div>
+        `;
+    }
 }
 
 // ------ Sequence Track + Hydrophobicity ------

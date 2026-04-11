@@ -258,6 +258,6 @@ personal, académico, docente, investigación y organizaciones sin ánimo de
 lucro. **Cualquier uso comercial requiere una licencia de pago firmada por el
 autor.**
 
-Para licencias comerciales: **abraham@tubuencamino.com**
+Para licencias comerciales: **abraham@leiro.dev**
 
 Ver [`LICENSE`](LICENSE) para los detalles completos.

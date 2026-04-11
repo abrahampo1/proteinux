@@ -175,6 +175,49 @@ it('lists library entries and supports search on the index page', function () {
     $filtered->assertDontSee('Ubiquitin');
 });
 
+it('lazily enriches a pending library row when /biblioteca is visited', function () {
+    $this->mock(CesgaApiService::class, function ($mock) {
+        $mock->shouldReceive('getJobStatus')->with('pending-job')->andReturn(['status' => 'COMPLETED']);
+        $mock->shouldReceive('getJobOutputs')->with('pending-job')->andReturn($this->fakeOutputs);
+    });
+
+    PredictedJob::create([
+        'sequence_hash' => str_repeat('c', 64),
+        'job_id' => 'pending-job',
+        'fasta_sequence' => ">hemo\nMVLSPADK",
+        'fasta_filename' => 'hemo.fasta',
+        'fasta_preview' => 'MVLSPADK',
+        'sequence_length' => 8,
+    ]);
+
+    $response = $this->get('/biblioteca');
+    $response->assertOk();
+    $response->assertSee('Hemoglobin alpha');        // nombre de la proteína enriquecido
+    $response->assertDontSee('sin nombre');          // fallback ya no debe aparecer
+
+    $row = PredictedJob::where('job_id', 'pending-job')->first();
+    expect($row->plddt_mean)->toBe(87.3)
+        ->and($row->protein_name)->toBe('Hemoglobin alpha')
+        ->and($row->completed_at)->not->toBeNull();
+});
+
+it('shows fasta_filename as display fallback when protein_name is null', function () {
+    $row = new PredictedJob([
+        'job_id' => 'abc123def456',
+        'fasta_filename' => 'custom_enzyme.fasta',
+    ]);
+
+    expect($row->displayName())->toBe('custom_enzyme');
+});
+
+it('falls back to a short job id only when there is no filename', function () {
+    $row = new PredictedJob([
+        'job_id' => 'abc123def456',
+    ]);
+
+    expect($row->displayName())->toBe('sin nombre · abc123de');
+});
+
 it('reruns a library entry with the stored FASTA', function () {
     $this->mock(CesgaApiService::class, function ($mock) {
         $mock->shouldReceive('submitJob')->once()->andReturn(['job_id' => 'rerun-99']);

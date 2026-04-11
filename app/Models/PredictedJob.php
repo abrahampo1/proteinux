@@ -40,6 +40,13 @@ class PredictedJob extends Model
 
     public function displayName(): string
     {
-        return $this->protein_name ?: ('job '.substr((string) $this->job_id, 0, 8));
+        if ($this->protein_name) {
+            return $this->protein_name;
+        }
+        if ($this->fasta_filename) {
+            return preg_replace('/\.(fasta|fa|fna|txt)$/i', '', $this->fasta_filename) ?: $this->fasta_filename;
+        }
+
+        return 'sin nombre · '.substr((string) $this->job_id, 0, 8);
     }
 }

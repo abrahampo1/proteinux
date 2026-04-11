@@ -348,17 +348,6 @@
                     </div>
                 </section>
 
-                @if(isset($libraryEntry) && $libraryEntry)
-                    <form action="{{ route('library.rerun', $libraryEntry) }}" method="POST">
-                        @csrf
-                        <button type="submit"
-                                class="btn-secondary block w-full justify-center text-center"
-                                onclick="return confirm('¿Relanzar esta predicción? Consumirá GPU nueva en el CESGA.')">
-                            ↻ ejecutar de nuevo
-                        </button>
-                    </form>
-                @endif
-
                 <a href="{{ route('jobs.create') }}" class="btn-secondary block w-full justify-center text-center">
                     + nuevo envío
                 </a>
@@ -415,6 +404,24 @@
                 enter para enviar · shift+enter para salto de línea
             </p>
         </section>
+
+        {{-- ─────────── PIE · RE-EJECUCIÓN ─────────── --}}
+        @if(isset($libraryEntry) && $libraryEntry)
+            <footer class="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-ink-300 pt-6">
+                <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">
+                    · guardado el <span class="text-ink-700 tabular-nums">{{ $libraryEntry->created_at->format('Y-m-d') }}</span>
+                    <span class="text-ink-400">en la biblioteca</span>
+                </span>
+                <form action="{{ route('library.rerun', $libraryEntry) }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                            class="btn-secondary"
+                            onclick="return confirm('¿Relanzar esta predicción? Consumirá GPU nueva en el CESGA.')">
+                        ↻ ejecutar de nuevo
+                    </button>
+                </form>
+            </footer>
+        @endif
     </div>
 
     {{-- ─────────── FALLIDO ─────────── --}}

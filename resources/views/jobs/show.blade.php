@@ -113,13 +113,15 @@
                 <figure class="panel">
                     <figcaption class="flex items-center justify-between border-b border-ink-300 px-5 py-3">
                         <span class="label-tag">fig. 1 · estructura 3d</span>
-                        <div class="flex items-center gap-1" id="viewer-controls">
+                        <div class="flex flex-wrap items-center gap-1" id="viewer-controls">
                             <button onclick="setViewerStyle('cartoon')" id="btn-cartoon"
                                     class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider bg-signal-mint/15 text-signal-mint-deep border border-signal-mint/40">cartoon</button>
                             <button onclick="setViewerStyle('stick')" id="btn-stick"
                                     class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">varilla</button>
                             <button onclick="setViewerStyle('sphere')" id="btn-sphere"
                                     class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">esfera</button>
+                            <button onclick="setViewerStyle('surface')" id="btn-surface"
+                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">superficie</button>
                             <span class="mx-1 text-ink-300">|</span>
                             <button onclick="toggleSpin()" id="btn-spin"
                                     class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">girar</button>
@@ -128,6 +130,10 @@
                         </div>
                     </figcaption>
                     <div id="viewer-container" style="position:relative;width:100%;height:520px;background:#ffffff"></div>
+                    <div class="flex items-center justify-between gap-4 border-t border-ink-300 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+                        <span id="viewer-source">procedencia · cargando…</span>
+                        <span id="viewer-hover" class="text-ink-700 tabular-nums">&nbsp;</span>
+                    </div>
                     <div class="grid grid-cols-2 gap-4 border-t border-ink-300 px-5 py-3 font-mono text-[10px] uppercase tracking-wider text-ink-500 sm:grid-cols-4">
                         <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#0053D6"></span>muy alta &gt;90</span>
                         <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#65CBF3"></span>alta 70–90</span>
@@ -369,7 +375,7 @@ function renderResults() {
     document.getElementById('confidence-badge-container').innerHTML = buildConfidenceBadge(confidence.plddt_mean);
 
     // Esperar a un frame para que el layout esté asentado antes de inicializar el visor
-    requestAnimationFrame(() => init3DViewer(structural.pdb_file, confidence.plddt_per_residue));
+    requestAnimationFrame(() => init3DViewer(structural.pdb_file, confidence.plddt_per_residue, meta));
 
     drawPlddtChart(confidence.plddt_per_residue);
 
@@ -393,29 +399,85 @@ function renderResults() {
 }
 
 // ====== VISOR 3D ======
-function init3DViewer(pdbString, plddtArray) {
+// pLDDT global (se usa dentro de colorfunc y tras fetch del PDB real)
+let currentPlddt = null;
+
+/**
+ * Cuenta cuántos residuos tiene una cadena PDB contando las líneas ATOM
+ * con átomo CA (una por residuo).
+ */
+function countResiduesInPdb(pdbString) {
+    if (!pdbString) return 0;
+    let count = 0;
+    const lines = pdbString.split('\n');
+    for (const line of lines) {
+        if (line.startsWith('ATOM') && line.substring(12, 16).trim() === 'CA') {
+            count++;
+        }
+    }
+    return count;
+}
+
+/**
+ * Si la metadata tiene pdb_id, intenta descargar la estructura canónica de
+ * RCSB PDB. Es la misma práctica que usan los visores de AlphaFold / UniProt:
+ * mostrar la estructura experimental como referencia cuando está disponible.
+ * Si falla, devuelve el PDB local.
+ */
+async function resolvePdbSource(localPdb, metadata) {
+    const pdbId = metadata && metadata.pdb_id;
+    const localResidues = countResiduesInPdb(localPdb);
+
+    // Si el PDB local ya tiene bastantes residuos, úsalo directamente.
+    if (localResidues >= 20 || !pdbId) {
+        return { pdb: localPdb, source: pdbId ? `pdb ${pdbId} · simulador` : 'simulador cesga' };
+    }
+
+    // El PDB del simulador es un stub — pedimos el real a RCSB.
+    try {
+        const url = `https://files.rcsb.org/download/${encodeURIComponent(pdbId)}.pdb`;
+        const resp = await fetch(url, { mode: 'cors' });
+        if (!resp.ok) throw new Error(`rcsb ${resp.status}`);
+        const realPdb = await resp.text();
+        return { pdb: realPdb, source: `pdb ${pdbId} · rcsb · estructura experimental` };
+    } catch (err) {
+        console.warn('No se pudo descargar el PDB real desde RCSB, usando el local:', err);
+        return { pdb: localPdb, source: `${pdbId} · fallback local` };
+    }
+}
+
+async function init3DViewer(pdbString, plddtArray, metadata) {
     const container = document.getElementById('viewer-container');
     if (!container) return;
 
     if (!window.$3Dmol) {
         container.innerHTML = '<p style="display:flex;align-items:center;justify-content:center;height:100%;color:#7a7461;font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">cargando visor 3d…</p>';
-        setTimeout(() => init3DViewer(pdbString, plddtArray), 500);
+        setTimeout(() => init3DViewer(pdbString, plddtArray, metadata), 500);
         return;
     }
 
-    // Si por alguna razón el contenedor no tiene tamaño, forzamos uno mínimo.
     if (container.clientWidth === 0 || container.clientHeight === 0) {
         container.style.width = '100%';
         container.style.height = '520px';
     }
 
-    // Destruir cualquier viewer previo (evita canvas fantasmas si re-init)
     container.innerHTML = '';
+
+    // Guardar pLDDT para usarlo desde cualquier cambio de estilo posterior
+    currentPlddt = plddtArray || [];
+
+    // Resolver qué PDB usar (real o stub)
+    const sourceLabel = document.getElementById('viewer-source');
+    if (sourceLabel) sourceLabel.textContent = 'procedencia · descargando pdb real…';
+
+    const { pdb: resolvedPdb, source } = await resolvePdbSource(pdbString, metadata);
+    if (sourceLabel) sourceLabel.textContent = `procedencia · ${source}`;
 
     try {
         viewer = $3Dmol.createViewer(container, {
             backgroundColor: 'white',
             antialias: true,
+            id: 'proteinux-viewer',
         });
     } catch (e) {
         console.error('No se pudo crear el visor 3Dmol:', e);
@@ -423,19 +485,39 @@ function init3DViewer(pdbString, plddtArray) {
         return;
     }
 
-    viewer.addModel(pdbString, 'pdb');
+    viewer.addModel(resolvedPdb, 'pdb', { keepH: true });
 
+    // Asignar pLDDT por residuo a cada átomo (usamos el b-factor)
     const atoms = viewer.getModel(0).selectedAtoms({});
-    if (plddtArray && plddtArray.length > 0) {
+    if (currentPlddt && currentPlddt.length > 0) {
         atoms.forEach(atom => {
             const resIdx = atom.resi - 1;
-            if (resIdx >= 0 && resIdx < plddtArray.length) {
-                atom.b = plddtArray[resIdx];
+            if (resIdx >= 0 && resIdx < currentPlddt.length) {
+                atom.b = currentPlddt[resIdx];
             }
         });
     }
 
     setViewerStyle('cartoon');
+
+    // Etiquetas al pasar el ratón — convención estándar de visores científicos
+    viewer.setHoverable(
+        {},
+        true,
+        function (atom) {
+            const label = document.getElementById('viewer-hover');
+            if (!label) return;
+            const plddt = currentPlddt && currentPlddt[atom.resi - 1];
+            label.textContent =
+                `${atom.resn || ''}${atom.resi || ''} · ${atom.atom || ''}` +
+                (plddt !== undefined ? ` · pLDDT ${plddt.toFixed(1)}` : '');
+        },
+        function () {
+            const label = document.getElementById('viewer-hover');
+            if (label) label.innerHTML = '&nbsp;';
+        }
+    );
+
     viewer.zoomTo();
     viewer.render();
 
@@ -457,28 +539,86 @@ window.addEventListener('resize', () => {
     }
 });
 
+let currentStyle = 'cartoon';
+
+function plddtColorFunc(atom) {
+    // Preferimos el pLDDT indexado por residuo (cuando usamos el PDB real
+    // el b-factor es el factor B cristalográfico, no pLDDT).
+    let b = atom.b || 0;
+    if (currentPlddt && currentPlddt.length > 0) {
+        const idx = atom.resi - 1;
+        if (idx >= 0 && idx < currentPlddt.length) {
+            b = currentPlddt[idx];
+        }
+    }
+    if (b >= 90) return PLDDT_COLORS.veryHigh;
+    if (b >= 70) return PLDDT_COLORS.high;
+    if (b >= 50) return PLDDT_COLORS.medium;
+    return PLDDT_COLORS.low;
+}
+
 function setViewerStyle(style) {
     if (!viewer) return;
-    const colorFunc = function(atom) {
-        const b = atom.b || 0;
-        if (b >= 90) return PLDDT_COLORS.veryHigh;
-        if (b >= 70) return PLDDT_COLORS.high;
-        if (b >= 50) return PLDDT_COLORS.medium;
-        return PLDDT_COLORS.low;
-    };
+    currentStyle = style;
 
+    // Limpiar estilos y superficies previos
     viewer.setStyle({}, {});
+    viewer.removeAllSurfaces();
+
+    // HETATM (ligandos, cofactores, aguas) siempre como stick en gris tenue
+    viewer.setStyle({ hetflag: true, resn: 'HOH' }, {}); // ocultar aguas
+    viewer.setStyle({ hetflag: true }, {
+        stick: { color: '#94908a', radius: 0.18 },
+    });
+
     if (style === 'cartoon') {
-        viewer.setStyle({}, { cartoon: { colorfunc: colorFunc } });
+        viewer.setStyle({ hetflag: false }, {
+            cartoon: {
+                colorfunc: plddtColorFunc,
+                thickness: 0.4,
+                arrows: true,
+                tubes: false,
+                style: 'rectangle',
+                opacity: 1.0,
+            },
+        });
     } else if (style === 'stick') {
-        viewer.setStyle({}, { stick: { colorfunc: colorFunc, radius: 0.15 } });
+        viewer.setStyle({ hetflag: false }, {
+            stick: { colorfunc: plddtColorFunc, radius: 0.22 },
+            cartoon: {
+                colorfunc: plddtColorFunc,
+                thickness: 0.15,
+                opacity: 0.35,
+                style: 'rectangle',
+            },
+        });
     } else if (style === 'sphere') {
-        viewer.setStyle({}, { sphere: { colorfunc: colorFunc, scale: 0.3 } });
+        viewer.setStyle({ hetflag: false }, {
+            sphere: { colorfunc: plddtColorFunc, scale: 0.32 },
+        });
+    } else if (style === 'surface') {
+        // Cartoon por debajo como referencia estructural
+        viewer.setStyle({ hetflag: false }, {
+            cartoon: {
+                colorfunc: plddtColorFunc,
+                thickness: 0.4,
+                arrows: true,
+                style: 'rectangle',
+            },
+        });
+        // Superficie VDW semitransparente, coloreada por pLDDT
+        viewer.addSurface(
+            $3Dmol.SurfaceType.VDW,
+            { opacity: 0.72, colorfunc: plddtColorFunc },
+            { hetflag: false },
+        );
     }
+
     viewer.render();
 
-    ['cartoon', 'stick', 'sphere'].forEach(s => {
+    ['cartoon', 'stick', 'sphere', 'surface'].forEach(s => {
         const btn = document.getElementById('btn-' + s);
+        if (!btn) return;
         if (s === style) {
             btn.className = 'px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider bg-signal-mint/15 text-signal-mint-deep border border-signal-mint/40';
         } else {

@@ -5,77 +5,76 @@
 @section('content')
 
 {{-- ───────────────────────── HERO ───────────────────────── --}}
-<section class="relative border-b border-ink-700">
+<section class="relative border-b border-ink-300">
     <div class="mx-auto grid max-w-[1400px] gap-12 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8 lg:py-24">
 
-        {{-- Left: title block --}}
+        {{-- Izquierda: bloque de título --}}
         <div class="lg:col-span-7">
             <div class="label-tag mb-6">
-                <span>vol. 01 · note 001</span>
+                <span>vol. 01 · nota 001</span>
             </div>
 
-            <h1 class="font-serif text-[2.5rem] leading-[1.05] text-ink-50 sm:text-6xl">
-                Predicting the<br>
-                three-dimensional shape<br>
-                of <span class="italic text-signal-mint">any</span> protein.
+            <h1 class="font-serif text-[2.5rem] leading-[1.05] text-ink-900 sm:text-6xl">
+                Predecimos la<br>
+                forma tridimensional<br>
+                de <span class="italic text-signal-mint">cualquier</span> proteína.
             </h1>
 
-            <p class="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-200">
-                A web frontend for AlphaFold&thinsp;2 inference on the
-                <span class="text-ink-50">CESGA Finis Terrae&nbsp;III</span> supercomputer.
-                Submit a FASTA sequence, get back an annotated structure with
-                per-residue confidence, predicted aligned error and biological context.
-                No terminal, no SLURM, no queue file.
+            <p class="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-700">
+                Una interfaz web para inferencia con AlphaFold&thinsp;2 sobre el supercomputador
+                <span class="text-ink-900">CESGA Finis Terrae&nbsp;III</span>.
+                Envía una secuencia FASTA y recibe una estructura anotada con
+                confianza por residuo, error alineado predicho y contexto biológico.
+                Sin terminal, sin SLURM, sin ficheros de cola.
             </p>
 
             <div class="mt-10 flex flex-wrap items-center gap-3">
                 <a href="{{ route('jobs.create') }}" class="btn-primary">
-                    → submit sequence
+                    → enviar secuencia
                 </a>
                 <a href="{{ route('proteins.index') }}" class="btn-secondary">
-                    browse catalog
+                    explorar catálogo
                 </a>
             </div>
 
-            {{-- Authors / institution line, like a paper --}}
-            <div class="mt-10 border-t border-ink-700 pt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">
-                <div>cathedra camelia · medicina personalizada</div>
-                <div class="mt-1">impacthon 2026 · galicia, spain · open access</div>
+            {{-- Línea tipo paper --}}
+            <div class="mt-10 border-t border-ink-300 pt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">
+                <div>cátedra camelia · medicina personalizada</div>
+                <div class="mt-1">impacthon 2026 · galicia, españa · acceso abierto</div>
             </div>
         </div>
 
-        {{-- Right: instrument readout --}}
+        {{-- Derecha: lectura del instrumento --}}
         <div class="lg:col-span-5">
             <div class="crosshair panel p-6">
                 <div class="mb-5 flex items-center justify-between">
-                    <span class="label-tag">live · ft3 cluster</span>
-                    <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">
+                    <span class="label-tag">en vivo · clúster ft3</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">
                         {{ now()->format('Y-m-d H:i:s') }}
                     </span>
                 </div>
 
                 <img src="{{ asset('logo/LogoMol.svg') }}" alt="" class="mx-auto h-40 w-auto opacity-90">
 
-                {{-- Synthetic readout (always present, no @if needed) --}}
                 <dl class="mt-6 space-y-0">
                     <div class="field">
-                        <dt>queue depth</dt>
-                        <dd class="text-signal-mint">3 jobs</dd>
+                        <dt>trabajos en cola</dt>
+                        <dd class="text-signal-mint">3 trabajos</dd>
                     </div>
                     <div class="field">
-                        <dt>gpu utilisation</dt>
-                        <dd>74<span class="text-ink-400">%</span></dd>
+                        <dt>uso de gpu</dt>
+                        <dd>74<span class="text-ink-500">%</span></dd>
                     </div>
                     <div class="field">
-                        <dt>median runtime</dt>
+                        <dt>tiempo medio</dt>
                         <dd>00:04:12</dd>
                     </div>
                     <div class="field">
-                        <dt>model</dt>
-                        <dd>alphafold-2.3.1 · monomer</dd>
+                        <dt>modelo</dt>
+                        <dd>alphafold-2.3.1 · monómero</dd>
                     </div>
                     <div class="field">
-                        <dt>last completed</dt>
+                        <dt>último completado</dt>
                         <dd>{{ now()->subMinutes(7)->format('H:i:s') }}</dd>
                     </div>
                 </dl>
@@ -84,82 +83,82 @@
     </div>
 </section>
 
-{{-- ───────────────────────── METRICS STRIP ───────────────────────── --}}
+{{-- ───────────────────────── MÉTRICAS ───────────────────────── --}}
 @if($stats)
-<section class="border-b border-ink-700 panel-flush">
-    <div class="mx-auto grid max-w-[1400px] grid-cols-2 divide-x divide-ink-700 sm:grid-cols-4">
+<section class="border-b border-ink-300 panel-flush">
+    <div class="mx-auto grid max-w-[1400px] grid-cols-2 divide-x divide-ink-300 sm:grid-cols-4">
         <div class="px-6 py-6 sm:px-8">
-            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">proteins indexed</div>
-            <div class="mt-2 font-mono text-3xl text-ink-50 tabular-nums">{{ $stats['total_proteins'] ?? '—' }}</div>
+            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">proteínas indexadas</div>
+            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ $stats['total_proteins'] ?? '—' }}</div>
         </div>
         <div class="px-6 py-6 sm:px-8">
-            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">curated entries</div>
-            <div class="mt-2 font-mono text-3xl text-ink-50 tabular-nums">{{ $stats['embedded_proteins'] ?? '—' }}</div>
+            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">entradas curadas</div>
+            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ $stats['embedded_proteins'] ?? '—' }}</div>
         </div>
         <div class="px-6 py-6 sm:px-8">
-            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">length range <span class="lowercase">/ aa</span></div>
-            <div class="mt-2 font-mono text-3xl text-ink-50 tabular-nums">{{ $stats['min_length'] ?? '—' }}<span class="text-ink-500">–</span>{{ $stats['max_length'] ?? '—' }}</div>
+            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">rango de longitud <span class="lowercase">/ aa</span></div>
+            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ $stats['min_length'] ?? '—' }}<span class="text-ink-400">–</span>{{ $stats['max_length'] ?? '—' }}</div>
         </div>
         <div class="px-6 py-6 sm:px-8">
-            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">functional families</div>
-            <div class="mt-2 font-mono text-3xl text-ink-50 tabular-nums">{{ count($stats['by_category'] ?? []) }}</div>
+            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">familias funcionales</div>
+            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ count($stats['by_category'] ?? []) }}</div>
         </div>
     </div>
 </section>
 @endif
 
-{{-- ───────────────────────── PROCEDURE / METHODS ───────────────────────── --}}
-<section class="border-b border-ink-700">
+{{-- ───────────────────────── PROCEDIMIENTO ───────────────────────── --}}
+<section class="border-b border-ink-300">
     <div class="mx-auto grid max-w-[1400px] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div class="lg:col-span-3">
-            <div class="label-tag">section 02 · methods</div>
-            <h2 class="mt-3 font-serif text-3xl text-ink-50">Procedure</h2>
-            <p class="mt-4 font-serif text-sm leading-relaxed text-ink-300">
-                Three deterministic stages, all transparent: data goes in, structure comes out.
-                Pipeline state is exposed throughout.
+            <div class="label-tag">sección 02 · métodos</div>
+            <h2 class="mt-3 font-serif text-3xl text-ink-900">Procedimiento</h2>
+            <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
+                Tres etapas deterministas, todas transparentes: los datos entran, la
+                estructura sale. El estado del pipeline es visible en todo momento.
             </p>
         </div>
 
         <div class="lg:col-span-9">
-            <ol class="divide-y divide-ink-700 border-y border-ink-700">
+            <ol class="divide-y divide-ink-300 border-y border-ink-300">
                 <li class="grid gap-6 py-6 md:grid-cols-12">
                     <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint md:col-span-2">
-                        § 2.1 — input
+                        § 2.1 — entrada
                     </div>
                     <div class="md:col-span-10">
-                        <h3 class="font-serif text-lg text-ink-50">Sequence intake</h3>
-                        <p class="mt-1 font-serif text-sm leading-relaxed text-ink-300">
-                            Paste a single-chain protein sequence in FASTA format. The header line
-                            is preserved as job metadata. Sequences are length-validated against
-                            the model context window (max 2 048 residues).
+                        <h3 class="font-serif text-lg text-ink-900">Recepción de la secuencia</h3>
+                        <p class="mt-1 font-serif text-sm leading-relaxed text-ink-600">
+                            Pega una secuencia proteica monocadena en formato FASTA. La cabecera
+                            se preserva como metadato del trabajo. La longitud se valida contra la
+                            ventana del modelo (máx. 2 048 residuos).
                         </p>
                     </div>
                 </li>
 
                 <li class="grid gap-6 py-6 md:grid-cols-12">
                     <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint md:col-span-2">
-                        § 2.2 — inference
+                        § 2.2 — inferencia
                     </div>
                     <div class="md:col-span-10">
-                        <h3 class="font-serif text-lg text-ink-50">AlphaFold2 on FT3</h3>
-                        <p class="mt-1 font-serif text-sm leading-relaxed text-ink-300">
-                            The job is dispatched to a GPU partition on Finis Terrae III.
-                            We poll the cluster every three seconds and stream stage transitions
-                            (<span class="font-mono text-ink-200">PENDING → RUNNING → POSTPROCESS</span>) into the UI.
+                        <h3 class="font-serif text-lg text-ink-900">AlphaFold2 sobre FT3</h3>
+                        <p class="mt-1 font-serif text-sm leading-relaxed text-ink-600">
+                            El trabajo se despacha a la partición GPU de Finis Terrae III.
+                            Sondeamos el clúster cada tres segundos y transmitimos las transiciones
+                            de estado (<span class="font-mono text-ink-800">PENDING → RUNNING → POSTPROCESS</span>) a la interfaz.
                         </p>
                     </div>
                 </li>
 
                 <li class="grid gap-6 py-6 md:grid-cols-12">
                     <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint md:col-span-2">
-                        § 2.3 — output
+                        § 2.3 — salida
                     </div>
                     <div class="md:col-span-10">
-                        <h3 class="font-serif text-lg text-ink-50">Annotated structure</h3>
-                        <p class="mt-1 font-serif text-sm leading-relaxed text-ink-300">
-                            You receive a 3D model coloured by per-residue pLDDT, the full
-                            predicted-aligned-error matrix, secondary-structure breakdown,
-                            HPC accounting and downloadable PDB / mmCIF files.
+                        <h3 class="font-serif text-lg text-ink-900">Estructura anotada</h3>
+                        <p class="mt-1 font-serif text-sm leading-relaxed text-ink-600">
+                            Recibes un modelo 3D coloreado por pLDDT por residuo, la matriz
+                            completa de error alineado predicho, el desglose de estructura
+                            secundaria, la facturación de HPC y los ficheros PDB / mmCIF.
                         </p>
                     </div>
                 </li>
@@ -168,59 +167,59 @@
     </div>
 </section>
 
-{{-- ───────────────────────── SAMPLE TABLE ───────────────────────── --}}
+{{-- ───────────────────────── TABLA DE MUESTRA ───────────────────────── --}}
 @if(!empty($samples))
-<section class="border-b border-ink-700">
+<section class="border-b border-ink-300">
     <div class="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 lg:px-8">
         <div class="mb-8 flex items-end justify-between gap-6">
             <div>
-                <div class="label-tag">section 03 · reference set</div>
-                <h2 class="mt-3 font-serif text-3xl text-ink-50">Try it on a known protein</h2>
-                <p class="mt-2 max-w-xl font-serif text-sm text-ink-300">
-                    Curated entries with verified UniProt &amp; PDB cross-references.
-                    Click any row to dispatch a prediction job using its sequence.
+                <div class="label-tag">sección 03 · conjunto de referencia</div>
+                <h2 class="mt-3 font-serif text-3xl text-ink-900">Pruébalo con una proteína conocida</h2>
+                <p class="mt-2 max-w-xl font-serif text-sm text-ink-600">
+                    Entradas curadas con referencias cruzadas verificadas a UniProt y PDB.
+                    Pulsa cualquier fila para enviar un trabajo de predicción usando su secuencia.
                 </p>
             </div>
             <a href="{{ route('proteins.index') }}" class="hidden btn-secondary lg:inline-flex">
-                full catalog →
+                catálogo completo →
             </a>
         </div>
 
         <div class="panel overflow-hidden">
             <table class="w-full font-mono text-xs">
-                <thead class="border-b border-ink-700 bg-ink-900/80 text-[10px] uppercase tracking-[0.14em] text-ink-400">
+                <thead class="border-b border-ink-300 bg-ink-150/80 text-[10px] uppercase tracking-[0.14em] text-ink-500">
                     <tr>
                         <th class="px-4 py-3 text-left font-medium">id</th>
-                        <th class="px-4 py-3 text-left font-medium">protein</th>
-                        <th class="px-4 py-3 text-left font-medium">organism</th>
-                        <th class="px-4 py-3 text-left font-medium">family</th>
-                        <th class="px-4 py-3 text-right font-medium">length / aa</th>
-                        <th class="px-4 py-3 text-right font-medium">action</th>
+                        <th class="px-4 py-3 text-left font-medium">proteína</th>
+                        <th class="px-4 py-3 text-left font-medium">organismo</th>
+                        <th class="px-4 py-3 text-left font-medium">familia</th>
+                        <th class="px-4 py-3 text-right font-medium">longitud / aa</th>
+                        <th class="px-4 py-3 text-right font-medium">acción</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-ink-700">
+                <tbody class="divide-y divide-ink-300">
                     @foreach(array_slice($samples, 0, 8) as $i => $sample)
-                        <tr class="group transition-colors hover:bg-ink-800/50">
-                            <td class="px-4 py-3 text-ink-500">{{ str_pad($i + 1, 3, '0', STR_PAD_LEFT) }}</td>
+                        <tr class="group transition-colors hover:bg-ink-150/60">
+                            <td class="px-4 py-3 text-ink-400">{{ str_pad($i + 1, 3, '0', STR_PAD_LEFT) }}</td>
                             <td class="px-4 py-3">
                                 <a href="{{ route('jobs.create', ['fasta' => $sample['fasta_ready'] ?? $sample['fasta_sequence'] ?? '', 'filename' => strtolower(str_replace(' ', '_', $sample['protein_name'] ?? 'protein')) . '.fasta']) }}"
-                                   class="text-ink-50 group-hover:text-signal-mint">
+                                   class="text-ink-900 group-hover:text-signal-mint">
                                     {{ $sample['protein_name'] ?? $sample['protein_id'] }}
                                 </a>
                             </td>
-                            <td class="px-4 py-3 italic text-ink-300">{{ $sample['organism'] ?? '—' }}</td>
+                            <td class="px-4 py-3 italic text-ink-600">{{ $sample['organism'] ?? '—' }}</td>
                             <td class="px-4 py-3">
                                 @if(!empty($sample['category']))
                                     <x-category-badge :category="$sample['category']" />
                                 @else
-                                    <span class="text-ink-500">—</span>
+                                    <span class="text-ink-400">—</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right tabular-nums text-ink-100">{{ $sample['length'] ?? '?' }}</td>
+                            <td class="px-4 py-3 text-right tabular-nums text-ink-800">{{ $sample['length'] ?? '?' }}</td>
                             <td class="px-4 py-3 text-right">
                                 <a href="{{ route('jobs.create', ['fasta' => $sample['fasta_ready'] ?? $sample['fasta_sequence'] ?? '', 'filename' => strtolower(str_replace(' ', '_', $sample['protein_name'] ?? 'protein')) . '.fasta']) }}"
                                    class="text-signal-mint opacity-0 group-hover:opacity-100">
-                                    predict →
+                                    predecir →
                                 </a>
                             </td>
                         </tr>
@@ -232,49 +231,49 @@
 </section>
 @endif
 
-{{-- ───────────────────────── GLOSSARY (margin notes) ───────────────────────── --}}
+{{-- ───────────────────────── GLOSARIO ───────────────────────── --}}
 <section>
     <div class="mx-auto grid max-w-[1400px] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div class="lg:col-span-3">
-            <div class="label-tag">appendix a · glossary</div>
-            <h2 class="mt-3 font-serif text-3xl text-ink-50">Margin notes</h2>
-            <p class="mt-4 font-serif text-sm leading-relaxed text-ink-300">
-                Quick definitions for non-bioinformaticians. Cited in the
-                results panel where the terms first appear.
+            <div class="label-tag">apéndice a · glosario</div>
+            <h2 class="mt-3 font-serif text-3xl text-ink-900">Notas al margen</h2>
+            <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
+                Definiciones rápidas para quien no es bioinformático. Citadas en el
+                panel de resultados donde aparecen los términos por primera vez.
             </p>
         </div>
 
-        <dl class="lg:col-span-9 grid gap-px bg-ink-700 sm:grid-cols-3">
-            <div class="bg-ink-900 p-6">
+        <dl class="lg:col-span-9 grid gap-px bg-ink-300 sm:grid-cols-3">
+            <div class="bg-ink-100 p-6">
                 <dt class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">
                     <sup class="mr-1">[1]</sup> fasta
                 </dt>
-                <dd class="mt-3 font-serif text-sm leading-relaxed text-ink-200">
-                    Plain-text format for biological sequences. Header line begins with
-                    <span class="font-mono text-ink-50">&gt;</span>, followed by the
-                    amino-acid string in single-letter code (M, Q, I, F, V, K…).
+                <dd class="mt-3 font-serif text-sm leading-relaxed text-ink-800">
+                    Formato de texto plano para secuencias biológicas. La cabecera empieza por
+                    <span class="font-mono text-ink-900">&gt;</span>, seguida de la cadena de
+                    aminoácidos en código de una sola letra (M, Q, I, F, V, K…).
                 </dd>
             </div>
 
-            <div class="bg-ink-900 p-6">
+            <div class="bg-ink-100 p-6">
                 <dt class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">
                     <sup class="mr-1">[2]</sup> pLDDT
                 </dt>
-                <dd class="mt-3 font-serif text-sm leading-relaxed text-ink-200">
-                    Predicted Local Distance Difference Test. Per-residue confidence
-                    score in [0, 100]. Values above 90 are very reliable;
-                    below 50 typically indicate disordered regions.
+                <dd class="mt-3 font-serif text-sm leading-relaxed text-ink-800">
+                    Predicted Local Distance Difference Test. Puntuación de confianza
+                    por residuo en [0, 100]. Valores por encima de 90 son muy fiables;
+                    por debajo de 50 suelen indicar regiones desordenadas.
                 </dd>
             </div>
 
-            <div class="bg-ink-900 p-6">
+            <div class="bg-ink-100 p-6">
                 <dt class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">
                     <sup class="mr-1">[3]</sup> alphafold2
                 </dt>
-                <dd class="mt-3 font-serif text-sm leading-relaxed text-ink-200">
-                    Deep-learning system from DeepMind that predicts protein 3D
-                    structures from sequence with near-experimental accuracy.
-                    Won CASP14 in 2020.
+                <dd class="mt-3 font-serif text-sm leading-relaxed text-ink-800">
+                    Sistema de aprendizaje profundo de DeepMind que predice estructuras
+                    proteicas en 3D a partir de la secuencia con precisión casi
+                    experimental. Ganó el CASP14 en 2020.
                 </dd>
             </div>
         </dl>

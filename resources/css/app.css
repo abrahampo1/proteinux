@@ -10,30 +10,31 @@
     --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
     --font-serif: 'IBM Plex Serif', ui-serif, Georgia, serif;
 
-    /* Lab workstation palette — warm-dark, low chroma */
-    --color-ink-950: #07090d;
-    --color-ink-900: #0b0e14;
-    --color-ink-850: #10141c;
-    --color-ink-800: #151a23;
-    --color-ink-700: #1d2330;
-    --color-ink-600: #2a3242;
-    --color-ink-500: #404a5e;
-    --color-ink-400: #6b7587;
-    --color-ink-300: #8a93a5;
-    --color-ink-200: #b3bbcb;
-    --color-ink-100: #d6dbe6;
-    --color-ink-50:  #ecedf2;
+    /* Paper / journal palette — warm cream backgrounds, ink-dark text.
+       Token semantics follow Tailwind: low number = light, high number = dark. */
+    --color-ink-50:  #faf7ee;  /* page background — warm paper */
+    --color-ink-100: #f3eee0;  /* panel surface */
+    --color-ink-150: #ece6d3;  /* secondary surface */
+    --color-ink-200: #e2dbc4;  /* elevated / subtle */
+    --color-ink-300: #cdc6b0;  /* default border */
+    --color-ink-400: #a59f86;  /* subtle border / very muted text */
+    --color-ink-500: #7a7461;  /* muted text */
+    --color-ink-600: #57523f;  /* secondary text */
+    --color-ink-700: #3a362a;  /* strong text */
+    --color-ink-800: #26241b;  /* heading text */
+    --color-ink-900: #16140e;  /* near-black ink */
+    --color-ink-950: #0a0906;  /* darkest */
 
-    /* Signal accents — desaturated, scientific */
-    --color-signal-mint: #5eead4;
-    --color-signal-mint-dim: #2dd4bf;
-    --color-signal-mint-deep: #0f766e;
-    --color-signal-amber: #f5b849;
-    --color-signal-amber-dim: #d4a017;
-    --color-signal-rust: #ef6f4a;
-    --color-signal-violet: #a78bfa;
+    /* Signal accents — calibrated for legibility on cream */
+    --color-signal-mint: #0d9488;
+    --color-signal-mint-dim: #0f766e;
+    --color-signal-mint-deep: #134e4a;
+    --color-signal-amber: #b45309;
+    --color-signal-amber-dim: #92400e;
+    --color-signal-rust: #b91c1c;
+    --color-signal-violet: #6d28d9;
 
-    /* AlphaFold pLDDT canonical scale */
+    /* AlphaFold pLDDT canonical scale (unchanged — these are domain colours) */
     --color-plddt-very-high: #0053D6;
     --color-plddt-high: #65CBF3;
     --color-plddt-medium: #FFDB13;
@@ -46,23 +47,22 @@
     }
 
     body {
-        background-color: var(--color-ink-950);
-        color: var(--color-ink-100);
+        background-color: var(--color-ink-50);
+        color: var(--color-ink-800);
         font-feature-settings: 'tnum', 'ss01';
         background-image:
-            radial-gradient(circle at 50% -10%, rgba(94, 234, 212, 0.04), transparent 55%),
-            linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+            radial-gradient(circle at 50% -10%, rgba(13, 148, 136, 0.06), transparent 55%),
+            linear-gradient(rgba(38, 36, 27, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(38, 36, 27, 0.025) 1px, transparent 1px);
         background-size: auto, 32px 32px, 32px 32px;
         background-position: 0 0, -1px -1px, -1px -1px;
     }
 
     ::selection {
-        background: rgba(94, 234, 212, 0.25);
-        color: #fff;
+        background: rgba(13, 148, 136, 0.22);
+        color: var(--color-ink-900);
     }
 
-    /* Tabular numerals everywhere data shows up */
     .tabular,
     .font-mono,
     th,
@@ -74,9 +74,9 @@
 }
 
 @layer components {
-    /* Bracketed section label — used everywhere */
+    /* Bracketed section label */
     .label-tag {
-        @apply inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400;
+        @apply inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-500;
     }
     .label-tag::before {
         content: '[';
@@ -87,26 +87,26 @@
         color: var(--color-signal-mint);
     }
 
-    /* Hairline panel — flat, no rounded-2xl */
+    /* Hairline panel */
     .panel {
-        @apply border border-ink-700 bg-ink-900/60 backdrop-blur-[1px];
+        @apply border border-ink-300 bg-ink-100/70 backdrop-blur-[1px];
     }
     .panel-flush {
-        @apply border-y border-ink-700 bg-ink-900/40;
+        @apply border-y border-ink-300 bg-ink-100/50;
     }
 
-    /* Field row — labelled metadata line */
+    /* Field row */
     .field {
-        @apply flex items-baseline justify-between gap-4 border-b border-dashed border-ink-700 py-2 last:border-b-0;
+        @apply flex items-baseline justify-between gap-4 border-b border-dashed border-ink-300 py-2 last:border-b-0;
     }
     .field dt {
-        @apply font-mono text-[11px] uppercase tracking-wider text-ink-400;
+        @apply font-mono text-[11px] uppercase tracking-wider text-ink-500;
     }
     .field dd {
-        @apply font-mono text-sm text-ink-100;
+        @apply font-mono text-sm text-ink-900;
     }
 
-    /* Crosshair corner ornaments — pure CSS */
+    /* Crosshair corner ornaments */
     .crosshair {
         position: relative;
     }
@@ -117,7 +117,7 @@
         width: 10px;
         height: 10px;
         border: 1px solid var(--color-signal-mint);
-        opacity: 0.6;
+        opacity: 0.7;
     }
     .crosshair::before {
         top: -1px;
@@ -134,18 +134,17 @@
 
     /* Form input baseline */
     .input-lab {
-        @apply w-full border border-ink-700 bg-ink-900 px-3 py-2.5 font-mono text-sm text-ink-50 placeholder:text-ink-500 transition-colors focus:border-signal-mint focus:outline-none focus:ring-1 focus:ring-signal-mint/40;
+        @apply w-full border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:border-signal-mint focus:outline-none focus:ring-1 focus:ring-signal-mint/30;
     }
 
-    /* Primary action button — terminal/instrument feel */
+    /* Buttons */
     .btn-primary {
-        @apply inline-flex items-center gap-2 border border-signal-mint bg-signal-mint/10 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-signal-mint transition-all hover:bg-signal-mint/20 hover:shadow-[0_0_0_1px_var(--color-signal-mint)];
+        @apply inline-flex items-center gap-2 border border-signal-mint bg-signal-mint/10 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-signal-mint-deep transition-all hover:bg-signal-mint/20 hover:shadow-[0_0_0_1px_var(--color-signal-mint)];
     }
     .btn-secondary {
-        @apply inline-flex items-center gap-2 border border-ink-600 bg-ink-900 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-ink-200 transition-colors hover:border-ink-400 hover:text-ink-50;
+        @apply inline-flex items-center gap-2 border border-ink-400 bg-ink-50 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-ink-700 transition-colors hover:border-ink-700 hover:text-ink-900;
     }
 
-    /* Status pill */
     .status-dot {
         @apply inline-block h-1.5 w-1.5 rounded-full;
     }

@@ -3,17 +3,17 @@
 @php
     $score = round($score, 1);
     if ($score >= 90) {
-        $cls = 'border-[#0053D6]/60 text-[#65CBF3] bg-[#0053D6]/15';
-        $label = 'very high';
+        $cls = 'border-[#0053D6]/60 text-[#0053D6] bg-[#0053D6]/10';
+        $label = 'muy alta';
     } elseif ($score >= 70) {
-        $cls = 'border-sky-500/60 text-sky-300 bg-sky-500/15';
-        $label = 'high';
+        $cls = 'border-sky-500/60 text-sky-700 bg-sky-50';
+        $label = 'alta';
     } elseif ($score >= 50) {
-        $cls = 'border-amber-500/60 text-amber-300 bg-amber-500/15';
-        $label = 'medium';
+        $cls = 'border-amber-500/60 text-amber-700 bg-amber-50';
+        $label = 'media';
     } else {
-        $cls = 'border-orange-500/60 text-orange-300 bg-orange-500/15';
-        $label = 'low';
+        $cls = 'border-orange-500/60 text-orange-700 bg-orange-50';
+        $label = 'baja';
     }
 @endphp
 

@@ -2,13 +2,20 @@
 
 @php
     $classes = match($type) {
-        'success' => 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
-        'error'   => 'border-red-500/30 bg-red-500/10 text-red-400',
-        'warning' => 'border-amber-500/30 bg-amber-500/10 text-amber-400',
-        default   => 'border-sky-500/30 bg-sky-500/10 text-sky-400',
+        'success' => 'border-signal-mint/50 bg-signal-mint/5 text-signal-mint',
+        'error'   => 'border-signal-rust/50 bg-signal-rust/5 text-signal-rust',
+        'warning' => 'border-signal-amber/50 bg-signal-amber/5 text-signal-amber',
+        default   => 'border-sky-500/50 bg-sky-500/5 text-sky-300',
+    };
+    $prefix = match($type) {
+        'success' => '[ ok ]',
+        'error'   => '[ err ]',
+        'warning' => '[ warn ]',
+        default   => '[ info ]',
     };
 @endphp
 
-<div class="rounded-lg border px-4 py-3 text-sm {{ $classes }}">
-    {{ $message }}
+<div class="flex items-start gap-3 border px-4 py-3 font-mono text-xs {{ $classes }}">
+    <span class="font-semibold uppercase tracking-wider">{{ $prefix }}</span>
+    <span class="text-ink-100">{{ $message }}</span>
 </div>

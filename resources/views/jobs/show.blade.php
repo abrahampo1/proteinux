@@ -3,219 +3,240 @@
 @section('title', 'Job ' . $jobId)
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8">
 
-    {{-- PENDING / RUNNING state --}}
+    {{-- Job header strip — always present --}}
+    <div class="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-ink-700 pb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-400">
+        <div class="flex items-center gap-3">
+            <span class="text-ink-500">job</span>
+            <span class="text-ink-50">{{ $jobId }}</span>
+            <span class="text-ink-500">|</span>
+            <span>pipeline <span class="text-ink-200">af2-proteinux/2.3.1</span></span>
+        </div>
+        <a href="{{ route('jobs.create') }}" class="text-signal-mint hover:underline">→ new submission</a>
+    </div>
+
+    {{-- ─────────── PENDING / RUNNING ─────────── --}}
     <div id="progress-section" class="{{ $outputs ? 'hidden' : '' }}">
-        <div class="mx-auto max-w-2xl text-center py-16">
-            <div class="mb-6">
-                <x-loading-spinner size="lg" class="mx-auto" />
-            </div>
-            <h1 class="text-2xl font-bold text-white mb-2" id="progress-title">Processing your sequence...</h1>
-            <p class="text-slate-400 mb-8" id="progress-subtitle">Your job is being prepared for the CESGA Finis Terrae III supercomputer.</p>
+        <div class="mx-auto max-w-2xl py-12">
+            <div class="label-tag mb-4">live · ft3 cluster</div>
 
-            {{-- Progress steps --}}
-            <div class="mx-auto max-w-md space-y-3 text-left" id="progress-steps">
-                <div class="flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3" data-step="PENDING">
-                    <div class="h-3 w-3 rounded-full bg-amber-400 animate-pulse" id="step-pending-dot"></div>
-                    <span class="text-sm text-slate-300">Queued &mdash; waiting for GPU resources</span>
-                </div>
-                <div class="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 opacity-40" data-step="RUNNING">
-                    <div class="h-3 w-3 rounded-full bg-slate-600" id="step-running-dot"></div>
-                    <span class="text-sm text-slate-400">Running AlphaFold2 inference</span>
-                </div>
-                <div class="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/50 px-4 py-3 opacity-40" data-step="POSTPROCESS">
-                    <div class="h-3 w-3 rounded-full bg-slate-600" id="step-post-dot"></div>
-                    <span class="text-sm text-slate-400">Generating structure files</span>
-                </div>
+            <h1 class="font-serif text-4xl text-ink-50" id="progress-title">Processing your sequence…</h1>
+            <p class="mt-3 max-w-xl font-serif text-base leading-relaxed text-ink-300" id="progress-subtitle">
+                Your job is being prepared for the CESGA Finis Terrae&nbsp;III supercomputer.
+            </p>
+
+            <div class="mt-6">
+                <x-loading-spinner size="lg" />
             </div>
 
-            {{-- Fun facts --}}
-            <div class="mt-8 rounded-lg border border-slate-800 bg-slate-900/30 p-4">
-                <p class="text-xs text-slate-500 mb-1">Did you know?</p>
-                <p class="text-sm text-slate-400" id="fun-fact">Proteins are molecular machines — they digest food, move muscles, defend against infections, and copy DNA.</p>
-            </div>
+            {{-- Pipeline trace --}}
+            <ol class="mt-8 border border-ink-700 bg-ink-900/40" id="progress-steps">
+                <li class="flex items-center justify-between gap-4 border-b border-ink-700 px-5 py-4 transition-colors" data-step="PENDING">
+                    <div class="flex items-center gap-4">
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-signal-mint">§ 01</span>
+                        <div class="h-2 w-2 rounded-full bg-amber-400 animate-pulse" id="step-pending-dot"></div>
+                        <span class="font-mono text-xs uppercase tracking-wider text-ink-100">queued · waiting for gpu</span>
+                    </div>
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">stage 01/03</span>
+                </li>
+                <li class="flex items-center justify-between gap-4 border-b border-ink-700 px-5 py-4 opacity-40 transition-opacity" data-step="RUNNING">
+                    <div class="flex items-center gap-4">
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">§ 02</span>
+                        <div class="h-2 w-2 rounded-full bg-slate-600" id="step-running-dot"></div>
+                        <span class="font-mono text-xs uppercase tracking-wider text-ink-300">running alphafold2 inference</span>
+                    </div>
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">stage 02/03</span>
+                </li>
+                <li class="flex items-center justify-between gap-4 px-5 py-4 opacity-40 transition-opacity" data-step="POSTPROCESS">
+                    <div class="flex items-center gap-4">
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">§ 03</span>
+                        <div class="h-2 w-2 rounded-full bg-slate-600" id="step-post-dot"></div>
+                        <span class="font-mono text-xs uppercase tracking-wider text-ink-300">generating structure files</span>
+                    </div>
+                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">stage 03/03</span>
+                </li>
+            </ol>
+
+            {{-- Marginalia / context --}}
+            <aside class="mt-6 border-l-2 border-signal-mint/40 bg-ink-900/30 px-5 py-4">
+                <div class="label-tag mb-2">marginalia</div>
+                <p class="font-serif text-sm leading-relaxed text-ink-200" id="fun-fact">
+                    Proteins are molecular machines — they digest food, move muscles, defend against infections, and copy DNA.
+                </p>
+            </aside>
         </div>
     </div>
 
-    {{-- COMPLETED state --}}
+    {{-- ─────────── COMPLETED ─────────── --}}
     <div id="results-section" class="{{ $outputs ? '' : 'hidden' }}">
-        {{-- Summary header --}}
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-white" id="result-title">
+
+        {{-- Result title block --}}
+        <header class="mb-8 grid items-end gap-4 border-b border-ink-700 pb-6 lg:grid-cols-12">
+            <div class="lg:col-span-9">
+                <div class="label-tag">result · structure prediction</div>
+                <h1 class="mt-3 font-serif text-4xl text-ink-50" id="result-title">
                     @if($outputs && ($outputs['protein_metadata'] ?? null))
                         {{ $outputs['protein_metadata']['protein_name'] }}
                     @else
                         Prediction Results
                     @endif
                 </h1>
-                <p class="mt-1 text-sm text-slate-400" id="result-subtitle">
+                <p class="mt-2 font-serif text-base text-ink-300" id="result-subtitle">
                     @if($outputs && ($outputs['protein_metadata'] ?? null))
                         <span class="italic">{{ $outputs['protein_metadata']['organism'] ?? '' }}</span>
                         @if($outputs['protein_metadata']['uniprot_id'] ?? null)
-                            &middot; UniProt: <a href="https://www.uniprot.org/uniprot/{{ $outputs['protein_metadata']['uniprot_id'] }}" target="_blank" class="text-teal-400 hover:underline">{{ $outputs['protein_metadata']['uniprot_id'] }}</a>
+                            &middot; UniProt: <a href="https://www.uniprot.org/uniprot/{{ $outputs['protein_metadata']['uniprot_id'] }}" target="_blank" class="font-mono text-signal-mint hover:underline">{{ $outputs['protein_metadata']['uniprot_id'] }}</a>
                         @endif
                         @if($outputs['protein_metadata']['pdb_id'] ?? null)
-                            &middot; PDB: <a href="https://www.rcsb.org/structure/{{ $outputs['protein_metadata']['pdb_id'] }}" target="_blank" class="text-teal-400 hover:underline">{{ $outputs['protein_metadata']['pdb_id'] }}</a>
+                            &middot; PDB: <a href="https://www.rcsb.org/structure/{{ $outputs['protein_metadata']['pdb_id'] }}" target="_blank" class="font-mono text-signal-mint hover:underline">{{ $outputs['protein_metadata']['pdb_id'] }}</a>
                         @endif
                     @else
                         Job {{ $jobId }}
                     @endif
                 </p>
             </div>
-            <div id="confidence-badge-container">
+            <div class="lg:col-span-3 lg:text-right" id="confidence-badge-container">
                 @if($outputs)
                     <x-confidence-badge :score="$outputs['structural_data']['confidence']['plddt_mean'] ?? 0" />
                 @endif
             </div>
-        </div>
+        </header>
 
-        {{-- Main grid: 3D viewer + sidebar --}}
-        <div class="grid gap-6 lg:grid-cols-3">
-            {{-- 3D Viewer --}}
-            <div class="lg:col-span-2">
-                <div class="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-                    <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3">
-                        <h2 class="text-sm font-semibold text-white">3D Structure</h2>
+        {{-- Main grid --}}
+        <div class="grid gap-6 lg:grid-cols-12">
+
+            {{-- 3D viewer + plots --}}
+            <div class="lg:col-span-8 space-y-6">
+
+                {{-- 3D viewer --}}
+                <figure class="panel">
+                    <figcaption class="flex items-center justify-between border-b border-ink-700 px-5 py-3">
+                        <span class="label-tag">fig. 1 · 3d structure</span>
                         <div class="flex items-center gap-1" id="viewer-controls">
-                            <button onclick="setViewerStyle('cartoon')" class="rounded px-2.5 py-1 text-xs font-medium bg-teal-600 text-white" id="btn-cartoon">Cartoon</button>
-                            <button onclick="setViewerStyle('stick')" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white" id="btn-stick">Stick</button>
-                            <button onclick="setViewerStyle('sphere')" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white" id="btn-sphere">Sphere</button>
-                            <span class="mx-1 text-slate-700">|</span>
-                            <button onclick="toggleSpin()" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white" id="btn-spin">Spin</button>
-                            <button onclick="resetViewer()" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white">Reset</button>
+                            <button onclick="setViewerStyle('cartoon')" id="btn-cartoon"
+                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider bg-signal-mint/20 text-signal-mint border border-signal-mint/40">cartoon</button>
+                            <button onclick="setViewerStyle('stick')" id="btn-stick"
+                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-400 border border-transparent hover:border-ink-600 hover:text-ink-100">stick</button>
+                            <button onclick="setViewerStyle('sphere')" id="btn-sphere"
+                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-400 border border-transparent hover:border-ink-600 hover:text-ink-100">sphere</button>
+                            <span class="mx-1 text-ink-700">|</span>
+                            <button onclick="toggleSpin()" id="btn-spin"
+                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-400 border border-transparent hover:border-ink-600 hover:text-ink-100">spin</button>
+                            <button onclick="resetViewer()"
+                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-400 border border-transparent hover:border-ink-600 hover:text-ink-100">reset</button>
                         </div>
+                    </figcaption>
+                    <div id="viewer-container" class="h-[520px] w-full bg-ink-950"></div>
+                    <div class="grid grid-cols-2 gap-4 border-t border-ink-700 px-5 py-3 font-mono text-[10px] uppercase tracking-wider text-ink-400 sm:grid-cols-4">
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#0053D6"></span>very high &gt;90</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#65CBF3"></span>high 70–90</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#FFDB13"></span>medium 50–70</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#FF7D45"></span>low &lt;50</span>
                     </div>
-                    <div id="viewer-container" class="h-[500px] w-full bg-slate-950"></div>
-                    {{-- pLDDT color legend --}}
-                    <div class="flex items-center justify-center gap-4 border-t border-slate-800 px-4 py-2.5 text-xs text-slate-400">
-                        <span class="font-medium">pLDDT Confidence:</span>
-                        <span class="flex items-center gap-1"><span class="inline-block h-3 w-3 rounded" style="background:#0053D6"></span> Very high (&gt;90)</span>
-                        <span class="flex items-center gap-1"><span class="inline-block h-3 w-3 rounded" style="background:#65CBF3"></span> High (70-90)</span>
-                        <span class="flex items-center gap-1"><span class="inline-block h-3 w-3 rounded" style="background:#FFDB13"></span> Medium (50-70)</span>
-                        <span class="flex items-center gap-1"><span class="inline-block h-3 w-3 rounded" style="background:#FF7D45"></span> Low (&lt;50)</span>
-                    </div>
-                </div>
+                </figure>
 
-                {{-- pLDDT per-residue chart --}}
-                <div class="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">
-                        pLDDT per Residue
-                        <x-tooltip text="Each bar represents how confident AlphaFold2 is about the predicted position of that amino acid. Higher is better. Blue bars (>90) are very reliable. Orange bars (<50) may indicate disordered regions.">
-                            <span class="ml-1 cursor-help text-slate-500 font-normal">(?)</span>
-                        </x-tooltip>
-                    </h2>
+                {{-- pLDDT plot --}}
+                <figure class="panel p-5">
+                    <figcaption class="mb-3 flex items-center justify-between">
+                        <span class="label-tag">fig. 2 · pLDDT per residue <sup class="text-signal-mint">[2]</sup></span>
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">x · residue index · y · score</span>
+                    </figcaption>
                     <canvas id="plddt-chart" class="w-full" height="120"></canvas>
-                </div>
+                </figure>
 
-                {{-- PAE Heatmap --}}
-                <div class="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">
-                        Predicted Aligned Error (PAE)
-                        <x-tooltip text="This heatmap shows how confident AlphaFold2 is about the relative positions of each pair of amino acids. Dark colors mean high confidence. Light/yellow regions between domains indicate uncertain relative orientation.">
-                            <span class="ml-1 cursor-help text-slate-500 font-normal">(?)</span>
-                        </x-tooltip>
-                    </h2>
-                    <div class="flex items-start gap-4">
+                {{-- PAE heatmap --}}
+                <figure class="panel p-5">
+                    <figcaption class="mb-3 flex items-center justify-between">
+                        <span class="label-tag">fig. 3 · predicted aligned error</span>
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">unit · ångström</span>
+                    </figcaption>
+                    <div class="flex items-start gap-5">
                         <div class="relative flex-1">
-                            <canvas id="pae-heatmap" class="w-full rounded"></canvas>
-                            <div id="pae-tooltip" class="pointer-events-none absolute hidden rounded bg-slate-800 px-2 py-1 text-xs text-white shadow-lg border border-slate-700"></div>
+                            <canvas id="pae-heatmap" class="w-full"></canvas>
+                            <div id="pae-tooltip" class="pointer-events-none absolute hidden border border-ink-600 bg-ink-900 px-2 py-1 font-mono text-[10px] text-ink-50 shadow-lg"></div>
                         </div>
-                        {{-- Color scale --}}
-                        <div class="flex flex-col items-center gap-1 text-xs text-slate-500">
-                            <span>0 A</span>
-                            <div class="h-32 w-4 rounded" style="background: linear-gradient(to bottom, #0d4a3e, #14b8a6, #fbbf24, #ffffff)"></div>
-                            <span id="pae-max-label">30 A</span>
+                        <div class="flex flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+                            <span>0 Å</span>
+                            <div class="h-32 w-3" style="background: linear-gradient(to bottom, #0d4a3e, #14b8a6, #fbbf24, #ffffff)"></div>
+                            <span id="pae-max-label">30 Å</span>
                         </div>
                     </div>
-                </div>
+                </figure>
             </div>
 
-            {{-- Sidebar panels --}}
-            <div class="space-y-6">
+            {{-- Sidebar --}}
+            <aside class="lg:col-span-4 space-y-6">
+
                 {{-- Confidence summary --}}
-                <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">Confidence Summary</h2>
-                    <div class="space-y-2" id="confidence-summary">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-slate-400">Average pLDDT</span>
-                            <span class="font-semibold text-white" id="plddt-mean">—</span>
+                <section class="panel p-5">
+                    <div class="label-tag mb-4">tab. 1 · confidence summary</div>
+                    <dl class="space-y-0" id="confidence-summary">
+                        <div class="field">
+                            <dt>average pLDDT</dt>
+                            <dd id="plddt-mean">—</dd>
                         </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-slate-400">Mean PAE</span>
-                            <span class="font-semibold text-white" id="mean-pae">—</span>
+                        <div class="field">
+                            <dt>mean PAE</dt>
+                            <dd id="mean-pae">—</dd>
                         </div>
-                        <div class="mt-3 space-y-1.5" id="plddt-histogram">
-                            {{-- Filled by JS --}}
-                        </div>
-                    </div>
-                </div>
+                    </dl>
+                    <div class="mt-4 space-y-2" id="plddt-histogram"></div>
+                </section>
 
-                {{-- Biological data --}}
-                <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">Biological Properties</h2>
-                    <div class="space-y-3" id="bio-data">
-                        {{-- Filled by JS --}}
-                        <p class="text-sm text-slate-500">Loading...</p>
+                {{-- Bio --}}
+                <section class="panel p-5">
+                    <div class="label-tag mb-4">tab. 2 · biological properties</div>
+                    <div class="space-y-2" id="bio-data">
+                        <p class="font-mono text-xs text-ink-500">loading…</p>
                     </div>
-                </div>
+                </section>
 
-                {{-- Secondary Structure --}}
-                <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">Secondary Structure</h2>
+                {{-- Secondary structure --}}
+                <section class="panel p-5">
+                    <div class="label-tag mb-4">fig. 4 · secondary structure</div>
                     <canvas id="secondary-structure-chart" class="mx-auto" width="160" height="160"></canvas>
-                    <div class="mt-3 flex justify-center gap-4 text-xs text-slate-400" id="ss-legend"></div>
-                </div>
+                    <div class="mt-3 flex justify-center gap-4 font-mono text-[10px] uppercase tracking-wider text-ink-300" id="ss-legend"></div>
+                </section>
 
-                {{-- HPC Accounting --}}
-                <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">
-                        HPC Resources
-                        <x-tooltip text="Simulated computational resources consumed by this prediction on the CESGA Finis Terrae III supercomputer.">
-                            <span class="ml-1 cursor-help text-slate-500 font-normal">(?)</span>
-                        </x-tooltip>
-                    </h2>
+                {{-- HPC accounting --}}
+                <section class="panel p-5">
+                    <div class="label-tag mb-4">tab. 3 · hpc resources</div>
                     <div class="space-y-2" id="accounting-data">
-                        <p class="text-sm text-slate-500">Loading...</p>
+                        <p class="font-mono text-xs text-ink-500">loading…</p>
                     </div>
-                </div>
+                </section>
 
                 {{-- Downloads --}}
-                <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                    <h2 class="mb-3 text-sm font-semibold text-white">Downloads</h2>
+                <section class="panel p-5">
+                    <div class="label-tag mb-4">downloads</div>
                     <div class="space-y-2" id="downloads">
-                        <button onclick="downloadFile('pdb')" class="flex w-full items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-teal-500 hover:text-white">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            Download PDB
+                        <button onclick="downloadFile('pdb')" class="flex w-full items-center justify-between border border-ink-700 bg-ink-900 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-200 transition-colors hover:border-signal-mint hover:text-signal-mint">
+                            <span>↓ structure.pdb</span>
+                            <span class="text-ink-500">protein data bank</span>
                         </button>
-                        <button onclick="downloadFile('cif')" class="flex w-full items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-300 transition-colors hover:border-teal-500 hover:text-white">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            Download mmCIF
+                        <button onclick="downloadFile('cif')" class="flex w-full items-center justify-between border border-ink-700 bg-ink-900 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-200 transition-colors hover:border-signal-mint hover:text-signal-mint">
+                            <span>↓ structure.cif</span>
+                            <span class="text-ink-500">mmcif</span>
                         </button>
                     </div>
-                </div>
+                </section>
 
-                {{-- Submit another --}}
-                <a href="{{ route('jobs.create') }}" class="block rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-center text-sm font-medium text-slate-300 transition-colors hover:border-teal-500 hover:text-white">
-                    Submit Another Sequence
+                <a href="{{ route('jobs.create') }}" class="block btn-secondary justify-center text-center">
+                    + new submission
                 </a>
-            </div>
+            </aside>
         </div>
     </div>
 
-    {{-- FAILED state --}}
+    {{-- ─────────── FAILED ─────────── --}}
     <div id="error-section" class="hidden">
-        <div class="mx-auto max-w-lg py-16 text-center">
-            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20">
-                <svg class="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.834-2.694-.834-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-            </div>
-            <h2 class="text-xl font-bold text-white">Prediction Failed</h2>
-            <p class="mt-2 text-slate-400" id="error-message">An error occurred during prediction.</p>
-            <a href="{{ route('jobs.create') }}" class="mt-6 inline-block rounded-lg bg-teal-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-teal-500">
-                Try Again
+        <div class="mx-auto max-w-lg py-16">
+            <div class="label-tag mb-4">! prediction failed</div>
+            <h2 class="font-serif text-3xl text-ink-50">The pipeline could not complete</h2>
+            <p class="mt-3 font-serif text-ink-300" id="error-message">An error occurred during prediction.</p>
+            <a href="{{ route('jobs.create') }}" class="mt-6 inline-flex btn-primary">
+                ↻ try again
             </a>
         </div>
     </div>
@@ -279,7 +300,6 @@ function startPolling() {
                 setTimeout(poll, 3000);
             }
         } catch (err) {
-            // Cold start — retry
             setTimeout(poll, 5000);
         }
     };
@@ -288,22 +308,22 @@ function startPolling() {
 }
 
 function updateProgressUI(status) {
-    const steps = document.querySelectorAll('#progress-steps > div');
+    const steps = document.querySelectorAll('#progress-steps > li');
     const title = document.getElementById('progress-title');
     const subtitle = document.getElementById('progress-subtitle');
 
     if (status === 'PENDING') {
-        title.textContent = 'Waiting in queue...';
+        title.textContent = 'Waiting in queue…';
         subtitle.textContent = 'Your job is queued on the CESGA supercomputer. GPU resources will be allocated shortly.';
     } else if (status === 'RUNNING') {
-        title.textContent = 'AlphaFold2 is running...';
+        title.textContent = 'AlphaFold2 is running…';
         subtitle.textContent = 'The neural network is predicting the 3D structure of your protein.';
         steps[0].classList.remove('opacity-40');
-        steps[0].querySelector('div').classList.remove('animate-pulse');
-        steps[0].querySelector('div').classList.replace('bg-amber-400', 'bg-emerald-400');
+        steps[0].querySelector('div.h-2').classList.remove('animate-pulse');
+        steps[0].querySelector('div.h-2').classList.replace('bg-amber-400', 'bg-emerald-400');
         steps[1].classList.remove('opacity-40');
-        steps[1].querySelector('div').classList.add('animate-pulse');
-        steps[1].querySelector('div').classList.replace('bg-slate-600', 'bg-amber-400');
+        steps[1].querySelector('div.h-2').classList.add('animate-pulse');
+        steps[1].querySelector('div.h-2').classList.replace('bg-slate-600', 'bg-amber-400');
     }
 }
 
@@ -338,43 +358,33 @@ function renderResults() {
     const confidence = structural.confidence;
     const bio = currentOutputs.biological_data;
 
-    // Title
     if (meta) {
         document.getElementById('result-title').textContent = meta.protein_name;
         let sub = `<em>${meta.organism || ''}</em>`;
-        if (meta.uniprot_id) sub += ` &middot; UniProt: <a href="https://www.uniprot.org/uniprot/${meta.uniprot_id}" target="_blank" class="text-teal-400 hover:underline">${meta.uniprot_id}</a>`;
-        if (meta.pdb_id) sub += ` &middot; PDB: <a href="https://www.rcsb.org/structure/${meta.pdb_id}" target="_blank" class="text-teal-400 hover:underline">${meta.pdb_id}</a>`;
+        if (meta.uniprot_id) sub += ` &middot; UniProt: <a href="https://www.uniprot.org/uniprot/${meta.uniprot_id}" target="_blank" class="font-mono text-signal-mint hover:underline">${meta.uniprot_id}</a>`;
+        if (meta.pdb_id) sub += ` &middot; PDB: <a href="https://www.rcsb.org/structure/${meta.pdb_id}" target="_blank" class="font-mono text-signal-mint hover:underline">${meta.pdb_id}</a>`;
         document.getElementById('result-subtitle').innerHTML = sub;
     }
 
-    // Badge
     document.getElementById('confidence-badge-container').innerHTML = buildConfidenceBadge(confidence.plddt_mean);
 
-    // 3D Viewer
     init3DViewer(structural.pdb_file, confidence.plddt_per_residue);
-
-    // pLDDT chart
     drawPlddtChart(confidence.plddt_per_residue);
 
-    // PAE heatmap
     if (confidence.pae_matrix) {
         drawPaeHeatmap(confidence.pae_matrix);
     }
 
-    // Confidence summary
     document.getElementById('plddt-mean').textContent = confidence.plddt_mean.toFixed(1);
-    document.getElementById('mean-pae').textContent = (confidence.mean_pae || 0).toFixed(1) + ' A';
+    document.getElementById('mean-pae').textContent = (confidence.mean_pae || 0).toFixed(1) + ' Å';
     renderPlddtHistogram(confidence.plddt_histogram);
 
-    // Biological data
     renderBioData(bio);
 
-    // Secondary structure
     if (bio.secondary_structure_prediction) {
         drawSecondaryStructureChart(bio.secondary_structure_prediction);
     }
 
-    // Accounting
     if (currentAccounting) {
         renderAccounting(currentAccounting);
     }
@@ -384,17 +394,16 @@ function renderResults() {
 function init3DViewer(pdbString, plddtArray) {
     const container = document.getElementById('viewer-container');
     if (!window.$3Dmol) {
-        container.innerHTML = '<p class="flex items-center justify-center h-full text-slate-500 text-sm">3D viewer loading... please wait.</p>';
+        container.innerHTML = '<p class="flex items-center justify-center h-full text-ink-500 font-mono text-xs uppercase tracking-wider">3d viewer loading…</p>';
         setTimeout(() => init3DViewer(pdbString, plddtArray), 500);
         return;
     }
     viewer = $3Dmol.createViewer(container, {
-        backgroundColor: '#020617',
+        backgroundColor: '#07090d',
         antialias: true,
     });
     viewer.addModel(pdbString, 'pdb');
 
-    // Apply pLDDT coloring via B-factor
     const atoms = viewer.getModel(0).selectedAtoms({});
     if (plddtArray && plddtArray.length > 0) {
         atoms.forEach(atom => {
@@ -430,13 +439,12 @@ function setViewerStyle(style) {
     }
     viewer.render();
 
-    // Update button states
     ['cartoon', 'stick', 'sphere'].forEach(s => {
         const btn = document.getElementById('btn-' + s);
         if (s === style) {
-            btn.className = 'rounded px-2.5 py-1 text-xs font-medium bg-teal-600 text-white';
+            btn.className = 'px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider bg-signal-mint/20 text-signal-mint border border-signal-mint/40';
         } else {
-            btn.className = 'rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white';
+            btn.className = 'px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-400 border border-transparent hover:border-ink-600 hover:text-ink-100';
         }
     });
 }
@@ -447,8 +455,8 @@ function toggleSpin() {
     viewer.spin(spinning);
     const btn = document.getElementById('btn-spin');
     btn.className = spinning
-        ? 'rounded px-2.5 py-1 text-xs font-medium bg-teal-600 text-white'
-        : 'rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-700 hover:text-white';
+        ? 'px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider bg-signal-mint/20 text-signal-mint border border-signal-mint/40'
+        : 'px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-400 border border-transparent hover:border-ink-600 hover:text-ink-100';
 }
 
 function resetViewer() {
@@ -471,10 +479,9 @@ function drawPlddtChart(plddtArray) {
 
     ctx.clearRect(0, 0, w, h);
 
-    // Threshold lines
     [50, 70, 90].forEach(t => {
         const y = h - (t / 100) * h;
-        ctx.strokeStyle = '#334155';
+        ctx.strokeStyle = '#1d2330';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -482,7 +489,6 @@ function drawPlddtChart(plddtArray) {
         ctx.stroke();
     });
 
-    // Bars
     plddtArray.forEach((val, i) => {
         const x = i * barW;
         const barH = (val / 100) * h;
@@ -499,7 +505,7 @@ function drawPaeHeatmap(matrix) {
     const canvas = document.getElementById('pae-heatmap');
     const tooltip = document.getElementById('pae-tooltip');
     const n = matrix.length;
-    const size = Math.min(400, canvas.parentElement.clientWidth - 60);
+    const size = Math.min(420, canvas.parentElement.clientWidth - 60);
     canvas.width = size;
     canvas.height = size;
     canvas.style.width = size + 'px';
@@ -513,14 +519,13 @@ function drawPaeHeatmap(matrix) {
         for (let j = 0; j < n; j++)
             if (matrix[i][j] > maxVal) maxVal = matrix[i][j];
 
-    document.getElementById('pae-max-label').textContent = maxVal.toFixed(0) + ' A';
+    document.getElementById('pae-max-label').textContent = maxVal.toFixed(0) + ' Å';
 
     const imageData = ctx.createImageData(n, n);
     for (let i = 0; i < n; i++) {
         for (let j = 0; j < n; j++) {
             const val = matrix[i][j] / maxVal;
             const idx = (i * n + j) * 4;
-            // Green to white
             const r = Math.round(13 + val * 242);
             const g = Math.round(74 + val * 181);
             const b = Math.round(62 + val * 193);
@@ -539,7 +544,6 @@ function drawPaeHeatmap(matrix) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(tmpCanvas, 0, 0, size, size);
 
-    // Hover tooltip
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -547,7 +551,7 @@ function drawPaeHeatmap(matrix) {
         const i = Math.floor(y / cellSize);
         const j = Math.floor(x / cellSize);
         if (i >= 0 && i < n && j >= 0 && j < n) {
-            tooltip.textContent = `Residue ${i + 1} vs ${j + 1}: ${matrix[i][j].toFixed(2)} A`;
+            tooltip.textContent = `res ${i + 1} × ${j + 1} : ${matrix[i][j].toFixed(2)} Å`;
             tooltip.style.left = (x + 10) + 'px';
             tooltip.style.top = (y - 30) + 'px';
             tooltip.classList.remove('hidden');
@@ -562,21 +566,21 @@ function renderPlddtHistogram(hist) {
     const container = document.getElementById('plddt-histogram');
     const total = (hist.very_high || 0) + (hist.high || 0) + (hist.medium || 0) + (hist.low || 0);
     const items = [
-        { label: 'Very high (>90)', count: hist.very_high || 0, color: PLDDT_COLORS.veryHigh },
-        { label: 'High (70-90)', count: hist.high || 0, color: PLDDT_COLORS.high },
-        { label: 'Medium (50-70)', count: hist.medium || 0, color: PLDDT_COLORS.medium },
-        { label: 'Low (<50)', count: hist.low || 0, color: PLDDT_COLORS.low },
+        { label: 'very high &gt;90', count: hist.very_high || 0, color: PLDDT_COLORS.veryHigh },
+        { label: 'high 70–90', count: hist.high || 0, color: PLDDT_COLORS.high },
+        { label: 'medium 50–70', count: hist.medium || 0, color: PLDDT_COLORS.medium },
+        { label: 'low &lt;50', count: hist.low || 0, color: PLDDT_COLORS.low },
     ];
 
     container.innerHTML = items.map(item => {
         const pct = total > 0 ? (item.count / total * 100).toFixed(0) : 0;
         return `<div>
-            <div class="flex justify-between text-xs mb-0.5">
-                <span class="text-slate-400">${item.label}</span>
-                <span class="text-slate-300">${item.count} (${pct}%)</span>
+            <div class="flex justify-between font-mono text-[10px] uppercase tracking-wider mb-1">
+                <span class="text-ink-400">${item.label}</span>
+                <span class="text-ink-200 tabular-nums">${item.count} · ${pct}%</span>
             </div>
-            <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                <div class="h-full rounded-full" style="width:${pct}%; background:${item.color}"></div>
+            <div class="h-1 bg-ink-800 overflow-hidden">
+                <div class="h-full" style="width:${pct}%; background:${item.color}"></div>
             </div>
         </div>`;
     }).join('');
@@ -588,36 +592,34 @@ function renderBioData(bio) {
     const container = document.getElementById('bio-data');
     let html = '';
 
-    // Solubility
-    const solColor = bio.solubility_score >= 50 ? 'text-emerald-400' : 'text-amber-400';
-    html += `<div class="flex justify-between text-sm">
-        <span class="text-slate-400">Solubility</span>
-        <span class="${solColor} font-medium">${bio.solubility_score?.toFixed(1) ?? '—'}/100 (${bio.solubility_prediction || '—'})</span>
+    const solColor = bio.solubility_score >= 50 ? '#5eead4' : '#f5b849';
+    html += `<div class="field">
+        <dt>solubility</dt>
+        <dd style="color:${solColor}">${bio.solubility_score?.toFixed(1) ?? '—'}/100 · ${bio.solubility_prediction || '—'}</dd>
     </div>`;
 
-    // Stability
-    const stabColor = bio.stability_status === 'stable' ? 'text-emerald-400' : 'text-amber-400';
-    html += `<div class="flex justify-between text-sm">
-        <span class="text-slate-400">Instability Index</span>
-        <span class="${stabColor} font-medium">${bio.instability_index?.toFixed(1) ?? '—'} (${bio.stability_status || '—'})</span>
+    const stabColor = bio.stability_status === 'stable' ? '#5eead4' : '#f5b849';
+    html += `<div class="field">
+        <dt>instability index</dt>
+        <dd style="color:${stabColor}">${bio.instability_index?.toFixed(1) ?? '—'} · ${bio.stability_status || '—'}</dd>
     </div>`;
 
-    // Toxicity
     if (bio.toxicity_alerts && bio.toxicity_alerts.length > 0) {
-        html += `<div class="mt-2"><span class="text-xs font-medium text-red-400">Toxicity Alerts:</span>
-            <div class="mt-1 flex flex-wrap gap-1">${bio.toxicity_alerts.map(a => `<span class="rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-xs text-red-400">${a}</span>`).join('')}</div>
+        html += `<div class="mt-3 border border-signal-rust/40 bg-signal-rust/5 p-2">
+            <div class="font-mono text-[10px] uppercase tracking-wider text-signal-rust">! toxicity alerts</div>
+            <div class="mt-1 flex flex-wrap gap-1">${bio.toxicity_alerts.map(a => `<span class="border border-signal-rust/40 px-1.5 py-0.5 font-mono text-[10px] text-signal-rust">${a}</span>`).join('')}</div>
         </div>`;
     } else {
-        html += `<div class="flex justify-between text-sm">
-            <span class="text-slate-400">Toxicity</span>
-            <span class="text-emerald-400 font-medium">No alerts</span>
+        html += `<div class="field">
+            <dt>toxicity</dt>
+            <dd class="text-signal-mint">no alerts</dd>
         </div>`;
     }
 
-    // Allergenicity
     if (bio.allergenicity_alerts && bio.allergenicity_alerts.length > 0) {
-        html += `<div class="mt-2"><span class="text-xs font-medium text-amber-400">Allergenicity Alerts:</span>
-            <div class="mt-1 flex flex-wrap gap-1">${bio.allergenicity_alerts.map(a => `<span class="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">${a}</span>`).join('')}</div>
+        html += `<div class="mt-3 border border-signal-amber/40 bg-signal-amber/5 p-2">
+            <div class="font-mono text-[10px] uppercase tracking-wider text-signal-amber">! allergenicity</div>
+            <div class="mt-1 flex flex-wrap gap-1">${bio.allergenicity_alerts.map(a => `<span class="border border-signal-amber/40 px-1.5 py-0.5 font-mono text-[10px] text-signal-amber">${a}</span>`).join('')}</div>
         </div>`;
     }
 
@@ -634,9 +636,9 @@ function drawSecondaryStructureChart(ss) {
     ctx.scale(dpr, dpr);
 
     const data = [
-        { label: 'Helix', pct: ss.helix_percent || 0, color: '#f43f5e' },
-        { label: 'Strand', pct: ss.strand_percent || 0, color: '#3b82f6' },
-        { label: 'Coil', pct: ss.coil_percent || 0, color: '#6b7280' },
+        { label: 'helix', pct: ss.helix_percent || 0, color: '#ef6f4a' },
+        { label: 'strand', pct: ss.strand_percent || 0, color: '#5eead4' },
+        { label: 'coil', pct: ss.coil_percent || 0, color: '#6b7585' },
     ];
 
     const cx = 80, cy = 80, r = 60, innerR = 40;
@@ -653,20 +655,18 @@ function drawSecondaryStructureChart(ss) {
         startAngle += angle;
     });
 
-    // Center text
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = 'bold 14px Inter, sans-serif';
+    ctx.fillStyle = '#ecedf2';
+    ctx.font = '600 11px "IBM Plex Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Structure', cx, cy - 6);
-    ctx.font = '11px Inter, sans-serif';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText('Prediction', cx, cy + 10);
+    ctx.fillText('STRUCTURE', cx, cy - 6);
+    ctx.font = '10px "IBM Plex Mono", monospace';
+    ctx.fillStyle = '#6b7585';
+    ctx.fillText('PREDICTION', cx, cy + 10);
 
-    // Legend
     const legend = document.getElementById('ss-legend');
     legend.innerHTML = data.map(d =>
-        `<span class="flex items-center gap-1"><span class="inline-block h-2.5 w-2.5 rounded" style="background:${d.color}"></span>${d.label} ${d.pct.toFixed(0)}%</span>`
+        `<span class="flex items-center gap-1.5"><span class="inline-block h-2 w-2" style="background:${d.color}"></span>${d.label} ${d.pct.toFixed(0)}%</span>`
     ).join('');
 }
 
@@ -676,34 +676,30 @@ function renderAccounting(acc) {
     const a = acc.accounting;
     const container = document.getElementById('accounting-data');
     container.innerHTML = `
-        <div class="grid grid-cols-2 gap-2 text-sm">
-            <span class="text-slate-400">CPU Hours</span>
-            <span class="text-white font-medium text-right">${a.cpu_hours?.toFixed(4) ?? '—'}</span>
-            <span class="text-slate-400">GPU Hours</span>
-            <span class="text-white font-medium text-right">${a.gpu_hours?.toFixed(4) ?? '—'}</span>
-            <span class="text-slate-400">Memory (GB&middot;h)</span>
-            <span class="text-white font-medium text-right">${a.memory_gb_hours?.toFixed(3) ?? '—'}</span>
-            <span class="text-slate-400">Wall Time</span>
-            <span class="text-white font-medium text-right">${a.total_wall_time_seconds ?? '—'}s</span>
-        </div>
-        <div class="mt-3 space-y-1.5">
-            ${buildEfficiencyBar('CPU Efficiency', a.cpu_efficiency_percent)}
-            ${buildEfficiencyBar('GPU Efficiency', a.gpu_efficiency_percent)}
-            ${buildEfficiencyBar('Memory Efficiency', a.memory_efficiency_percent)}
+        <dl class="space-y-0">
+            <div class="field"><dt>cpu hours</dt><dd>${a.cpu_hours?.toFixed(4) ?? '—'}</dd></div>
+            <div class="field"><dt>gpu hours</dt><dd>${a.gpu_hours?.toFixed(4) ?? '—'}</dd></div>
+            <div class="field"><dt>memory · gb·h</dt><dd>${a.memory_gb_hours?.toFixed(3) ?? '—'}</dd></div>
+            <div class="field"><dt>wall time</dt><dd>${a.total_wall_time_seconds ?? '—'}<span class="text-ink-400">s</span></dd></div>
+        </dl>
+        <div class="mt-4 space-y-2">
+            ${buildEfficiencyBar('cpu efficiency', a.cpu_efficiency_percent)}
+            ${buildEfficiencyBar('gpu efficiency', a.gpu_efficiency_percent)}
+            ${buildEfficiencyBar('memory efficiency', a.memory_efficiency_percent)}
         </div>
     `;
 }
 
 function buildEfficiencyBar(label, pct) {
     if (pct == null) return '';
-    const color = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+    const color = pct >= 80 ? '#5eead4' : pct >= 50 ? '#f5b849' : '#ef6f4a';
     return `<div>
-        <div class="flex justify-between text-xs mb-0.5">
-            <span class="text-slate-400">${label}</span>
-            <span class="text-slate-300">${pct.toFixed(1)}%</span>
+        <div class="flex justify-between font-mono text-[10px] uppercase tracking-wider mb-1">
+            <span class="text-ink-400">${label}</span>
+            <span class="text-ink-200 tabular-nums">${pct.toFixed(1)}%</span>
         </div>
-        <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden">
-            <div class="h-full rounded-full" style="width:${pct}%; background:${color}"></div>
+        <div class="h-1 bg-ink-800 overflow-hidden">
+            <div class="h-full" style="width:${pct}%; background:${color}"></div>
         </div>
     </div>`;
 }
@@ -711,11 +707,14 @@ function buildEfficiencyBar(label, pct) {
 function buildConfidenceBadge(score) {
     score = parseFloat(score).toFixed(1);
     let cls, label;
-    if (score >= 90) { cls = 'bg-[#0053D6]/20 text-[#65CBF3] border-[#0053D6]/40'; label = 'Very High'; }
-    else if (score >= 70) { cls = 'bg-sky-500/20 text-sky-300 border-sky-500/40'; label = 'High'; }
-    else if (score >= 50) { cls = 'bg-amber-500/20 text-amber-300 border-amber-500/40'; label = 'Medium'; }
-    else { cls = 'bg-orange-500/20 text-orange-300 border-orange-500/40'; label = 'Low'; }
-    return `<span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${cls}">pLDDT ${score} — ${label}</span>`;
+    if (score >= 90) { cls = 'bg-[#0053D6]/20 text-[#65CBF3] border-[#0053D6]/40'; label = 'very high'; }
+    else if (score >= 70) { cls = 'bg-sky-500/20 text-sky-300 border-sky-500/40'; label = 'high'; }
+    else if (score >= 50) { cls = 'bg-amber-500/20 text-amber-300 border-amber-500/40'; label = 'medium'; }
+    else { cls = 'bg-orange-500/20 text-orange-300 border-orange-500/40'; label = 'low'; }
+    return `<span class="inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider ${cls}">
+        <span class="status-dot" style="background:currentColor"></span>
+        pLDDT ${score} · ${label}
+    </span>`;
 }
 
 // ====== DOWNLOADS ======

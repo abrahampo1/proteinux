@@ -1,25 +1,26 @@
 @props(['protein'])
 
 <a href="{{ route('proteins.show', $protein['protein_id']) }}"
-   class="group block rounded-xl border border-slate-800 bg-slate-900 p-5 transition-all hover:border-teal-500/40 hover:bg-slate-800/80">
-    <div class="mb-3 flex items-start justify-between">
-        <h3 class="font-semibold text-white group-hover:text-teal-400 transition-colors">
+   class="group block border border-ink-700 bg-ink-900/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-900">
+    <div class="mb-3 flex items-start justify-between gap-3">
+        <h3 class="font-serif text-lg leading-tight text-ink-50 group-hover:text-signal-mint">
             {{ $protein['protein_name'] }}
         </h3>
         <x-category-badge :category="$protein['category']" />
     </div>
 
-    <p class="mb-3 text-sm text-slate-400 line-clamp-2">
-        {{ $protein['description'] ?? $protein['organism'] ?? 'No description' }}
+    <p class="mb-4 line-clamp-2 font-serif text-sm leading-relaxed text-ink-300">
+        {{ $protein['description'] ?? $protein['organism'] ?? 'No description available.' }}
     </p>
 
-    <div class="flex items-center gap-3 text-xs text-slate-500">
-        <span>{{ $protein['length'] }} aa</span>
-        <span>&middot;</span>
-        <span class="italic">{{ $protein['organism'] ?? 'Unknown' }}</span>
-        @if(!empty($protein['pdb_id']))
-            <span>&middot;</span>
-            <span>PDB: {{ $protein['pdb_id'] }}</span>
-        @endif
-    </div>
+    <dl class="grid grid-cols-2 gap-x-4 gap-y-1 border-t border-ink-700 pt-3 font-mono text-[10px] uppercase tracking-wider text-ink-400">
+        <div class="flex justify-between">
+            <dt>length</dt>
+            <dd class="text-ink-100 tabular-nums">{{ $protein['length'] }} aa</dd>
+        </div>
+        <div class="flex justify-between">
+            <dt>pdb</dt>
+            <dd class="text-ink-100">{{ $protein['pdb_id'] ?? '—' }}</dd>
+        </div>
+    </dl>
 </a>

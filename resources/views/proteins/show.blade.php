@@ -3,109 +3,142 @@
 @section('title', $protein['protein_name'] ?? 'Protein Detail')
 
 @section('content')
-<div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-    {{-- Back link --}}
-    <a href="{{ route('proteins.index') }}" class="mb-6 inline-flex items-center gap-1 text-sm text-slate-400 hover:text-teal-400">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-        Back to Catalog
+<div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 lg:px-8">
+
+    {{-- Breadcrumb --}}
+    <a href="{{ route('proteins.index') }}" class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-400 hover:text-signal-mint">
+        ← / catalog
     </a>
 
-    {{-- Header --}}
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold text-white">{{ $protein['protein_name'] }}</h1>
+    {{-- Header card --}}
+    <header class="mt-4 border-b border-ink-700 pb-8">
+        <div class="label-tag">entry · {{ str_pad((string)($protein['protein_id'] ?? '0'), 4, '0', STR_PAD_LEFT) }}</div>
+
+        <div class="mt-3 grid items-end gap-6 lg:grid-cols-12">
+            <div class="lg:col-span-9">
+                <h1 class="font-serif text-4xl text-ink-50 leading-tight">
+                    {{ $protein['protein_name'] }}
+                </h1>
+                <p class="mt-2 font-serif text-lg italic text-ink-300">
+                    {{ $protein['organism'] ?? 'Unknown organism' }}
+                </p>
                 @if(!empty($protein['category']))
-                    <x-category-badge :category="$protein['category']" />
+                    <div class="mt-3"><x-category-badge :category="$protein['category']" /></div>
                 @endif
             </div>
-            <p class="mt-1 text-slate-400 italic">{{ $protein['organism'] ?? 'Unknown organism' }}</p>
+            <div class="lg:col-span-3 lg:text-right">
+                <a href="{{ route('jobs.create', ['fasta' => $protein['fasta_ready'] ?? '', 'filename' => ($protein['protein_id'] ?? 'protein') . '.fasta']) }}"
+                   class="btn-primary justify-center w-full lg:w-auto">
+                    → predict structure
+                </a>
+            </div>
         </div>
-        <a href="{{ route('jobs.create', ['fasta' => $protein['fasta_ready'] ?? '', 'filename' => ($protein['protein_id'] ?? 'protein') . '.fasta']) }}"
-           class="shrink-0 rounded-lg bg-teal-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-600/20 transition-all hover:bg-teal-500">
-            Predict This Structure
-        </a>
-    </div>
+    </header>
 
-    {{-- Info grid --}}
-    <div class="grid gap-6 sm:grid-cols-2">
-        {{-- Details --}}
-        <div class="rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <h2 class="mb-4 text-sm font-semibold text-white">Details</h2>
-            <dl class="space-y-3 text-sm">
-                @if(!empty($protein['description']))
-                    <div>
-                        <dt class="text-slate-500">Description</dt>
-                        <dd class="mt-0.5 text-slate-300">{{ $protein['description'] }}</dd>
-                    </div>
-                @endif
-                @if(!empty($protein['function']))
-                    <div>
-                        <dt class="text-slate-500">Function</dt>
-                        <dd class="mt-0.5 text-slate-300">{{ $protein['function'] }}</dd>
-                    </div>
-                @endif
-                @if(!empty($protein['cellular_location']))
-                    <div>
-                        <dt class="text-slate-500">Cellular Location</dt>
-                        <dd class="mt-0.5 text-slate-300">{{ $protein['cellular_location'] }}</dd>
-                    </div>
-                @endif
-            </dl>
-        </div>
+    {{-- Two-column spec sheet --}}
+    <div class="mt-10 grid gap-8 lg:grid-cols-12">
 
-        {{-- Properties --}}
-        <div class="rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <h2 class="mb-4 text-sm font-semibold text-white">Properties</h2>
-            <dl class="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                    <dt class="text-slate-500">Length</dt>
-                    <dd class="font-medium text-white">{{ $protein['length'] ?? '—' }} aa</dd>
+        {{-- Left: prose --}}
+        <article class="lg:col-span-7 space-y-8">
+            @if(!empty($protein['description']))
+                <section>
+                    <div class="label-tag mb-3">§ 1 · description</div>
+                    <p class="font-serif text-base leading-relaxed text-ink-100">
+                        {{ $protein['description'] }}
+                    </p>
+                </section>
+            @endif
+
+            @if(!empty($protein['function']))
+                <section>
+                    <div class="label-tag mb-3">§ 2 · biological function</div>
+                    <p class="font-serif text-base leading-relaxed text-ink-100">
+                        {{ $protein['function'] }}
+                    </p>
+                </section>
+            @endif
+
+            @if(!empty($protein['cellular_location']))
+                <section>
+                    <div class="label-tag mb-3">§ 3 · cellular location</div>
+                    <p class="font-serif text-base leading-relaxed text-ink-100">
+                        {{ $protein['cellular_location'] }}
+                    </p>
+                </section>
+            @endif
+
+            {{-- FASTA viewer --}}
+            @if(!empty($protein['fasta_ready']))
+                <section>
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="label-tag">§ 4 · fasta payload</div>
+                        <button onclick="copyFasta()" id="copy-btn" class="btn-secondary !py-1.5 !px-3 !text-[10px]">
+                            copy
+                        </button>
+                    </div>
+                    <pre id="fasta-content" class="max-h-72 overflow-auto border border-ink-700 bg-ink-950 p-4 font-mono text-[11px] leading-relaxed text-signal-mint">{{ $protein['fasta_ready'] }}</pre>
+                </section>
+            @endif
+        </article>
+
+        {{-- Right: spec dl --}}
+        <aside class="lg:col-span-5">
+            <div class="panel crosshair p-6">
+                <div class="mb-4 flex items-center justify-between">
+                    <span class="label-tag">spec sheet</span>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400">v1</span>
                 </div>
-                @if(!empty($protein['molecular_weight']))
-                    <div>
-                        <dt class="text-slate-500">Molecular Weight</dt>
-                        <dd class="font-medium text-white">{{ number_format($protein['molecular_weight'], 1) }} Da</dd>
-                    </div>
-                @endif
-                @if(!empty($protein['uniprot_id']))
-                    <div>
-                        <dt class="text-slate-500">UniProt</dt>
-                        <dd><a href="https://www.uniprot.org/uniprot/{{ $protein['uniprot_id'] }}" target="_blank" class="font-medium text-teal-400 hover:underline">{{ $protein['uniprot_id'] }}</a></dd>
-                    </div>
-                @endif
-                @if(!empty($protein['pdb_id']))
-                    <div>
-                        <dt class="text-slate-500">PDB</dt>
-                        <dd><a href="https://www.rcsb.org/structure/{{ $protein['pdb_id'] }}" target="_blank" class="font-medium text-teal-400 hover:underline">{{ $protein['pdb_id'] }}</a></dd>
-                    </div>
-                @endif
-            </dl>
-        </div>
-    </div>
 
-    {{-- FASTA sequence --}}
-    @if(!empty($protein['fasta_ready']))
-        <div class="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-5">
-            <div class="mb-3 flex items-center justify-between">
-                <h2 class="text-sm font-semibold text-white">FASTA Sequence</h2>
-                <button onclick="copyFasta()" id="copy-btn"
-                        class="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-400 transition-colors hover:border-teal-500 hover:text-white">
-                    Copy
-                </button>
+                <dl class="space-y-0">
+                    <div class="field">
+                        <dt>length</dt>
+                        <dd>{{ $protein['length'] ?? '—' }} <span class="text-ink-400">aa</span></dd>
+                    </div>
+                    @if(!empty($protein['molecular_weight']))
+                        <div class="field">
+                            <dt>molecular weight</dt>
+                            <dd>{{ number_format($protein['molecular_weight'], 1) }} <span class="text-ink-400">Da</span></dd>
+                        </div>
+                    @endif
+                    @if(!empty($protein['uniprot_id']))
+                        <div class="field">
+                            <dt>uniprot</dt>
+                            <dd>
+                                <a href="https://www.uniprot.org/uniprot/{{ $protein['uniprot_id'] }}" target="_blank"
+                                   class="text-signal-mint hover:underline">{{ $protein['uniprot_id'] }} ↗</a>
+                            </dd>
+                        </div>
+                    @endif
+                    @if(!empty($protein['pdb_id']))
+                        <div class="field">
+                            <dt>pdb</dt>
+                            <dd>
+                                <a href="https://www.rcsb.org/structure/{{ $protein['pdb_id'] }}" target="_blank"
+                                   class="text-signal-mint hover:underline">{{ $protein['pdb_id'] }} ↗</a>
+                            </dd>
+                        </div>
+                    @endif
+                    @if(!empty($protein['organism']))
+                        <div class="field">
+                            <dt>organism</dt>
+                            <dd class="italic">{{ $protein['organism'] }}</dd>
+                        </div>
+                    @endif
+                </dl>
+
+                @if(!empty($protein['tags']))
+                    <div class="mt-6 border-t border-ink-700 pt-4">
+                        <div class="label-tag mb-3">tags</div>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach($protein['tags'] as $tag)
+                                <span class="border border-ink-600 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-300">{{ $tag }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
-            <pre id="fasta-content" class="max-h-48 overflow-auto rounded-lg bg-slate-950 p-4 text-xs text-emerald-400 font-mono leading-relaxed">{{ $protein['fasta_ready'] }}</pre>
-        </div>
-    @endif
-
-    {{-- Tags --}}
-    @if(!empty($protein['tags']))
-        <div class="mt-6 flex flex-wrap gap-2">
-            @foreach($protein['tags'] as $tag)
-                <span class="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs text-slate-400">{{ $tag }}</span>
-            @endforeach
-        </div>
-    @endif
+        </aside>
+    </div>
 </div>
 @endsection
 
@@ -115,11 +148,11 @@ function copyFasta() {
     const text = document.getElementById('fasta-content').textContent;
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copy-btn');
-        btn.textContent = 'Copied!';
-        btn.classList.add('border-teal-500', 'text-teal-400');
+        btn.textContent = 'copied ✓';
+        btn.classList.add('!text-signal-mint', '!border-signal-mint');
         setTimeout(() => {
-            btn.textContent = 'Copy';
-            btn.classList.remove('border-teal-500', 'text-teal-400');
+            btn.textContent = 'copy';
+            btn.classList.remove('!text-signal-mint', '!border-signal-mint');
         }, 2000);
     });
 }

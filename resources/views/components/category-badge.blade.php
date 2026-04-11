@@ -2,19 +2,19 @@
 
 @php
     $colors = [
-        'enzyme'          => 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-        'transport'       => 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-        'signaling'       => 'bg-teal-500/20 text-teal-300 border-teal-500/30',
-        'immune'          => 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-        'hormone'         => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-        'reporter'        => 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-        'structural'      => 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-        'oncology'        => 'bg-red-500/20 text-red-300 border-red-500/30',
-        'dna-replication' => 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+        'enzyme'          => 'border-violet-400/40 text-violet-300',
+        'transport'       => 'border-sky-400/40 text-sky-300',
+        'signaling'       => 'border-signal-mint/40 text-signal-mint',
+        'immune'          => 'border-rose-400/40 text-rose-300',
+        'hormone'         => 'border-signal-amber/40 text-signal-amber',
+        'reporter'        => 'border-emerald-400/40 text-emerald-300',
+        'structural'      => 'border-ink-500 text-ink-300',
+        'oncology'        => 'border-signal-rust/40 text-signal-rust',
+        'dna-replication' => 'border-indigo-400/40 text-indigo-300',
     ];
-    $classes = $colors[$category] ?? 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+    $classes = $colors[$category] ?? 'border-ink-500 text-ink-300';
 @endphp
 
-<span class="inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize {{ $classes }}">
+<span class="inline-flex border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider {{ $classes }}">
     {{ str_replace('-', ' ', $category) }}
 </span>

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Proteinux') — Protein Structure Prediction</title>
+    <title>@yield('title', 'Proteinux') · Protein Structure Prediction</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=ibm-plex-sans:400,500,600,700|ibm-plex-mono:400,500,600|ibm-plex-serif:400,500,600&display=swap" rel="stylesheet" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -15,32 +15,50 @@
 
     @stack('head')
 </head>
-<body class="min-h-screen bg-slate-950 text-slate-200 antialiased">
+<body class="min-h-screen antialiased">
+
+    {{-- Top status strip --}}
+    <div class="border-b border-ink-700 bg-ink-950/80 backdrop-blur">
+        <div class="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-4">
+                <span class="flex items-center gap-1.5">
+                    <span class="status-dot bg-signal-mint shadow-[0_0_6px_var(--color-signal-mint)]"></span>
+                    <span class="text-ink-300">node · cesga.ft3</span>
+                </span>
+                <span class="hidden sm:inline text-ink-500">|</span>
+                <span class="hidden sm:inline">pipeline <span class="text-ink-200">af2-proteinux/2.3.1</span></span>
+                <span class="hidden md:inline text-ink-500">|</span>
+                <span class="hidden md:inline">gpu <span class="text-ink-200">a100/40gb</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="hidden sm:inline">{{ now()->format('Y-m-d') }}<span class="text-ink-500"> · </span>{{ now()->format('H:i') }} <span class="text-ink-500">utc</span></span>
+                <span class="text-ink-500 hidden sm:inline">|</span>
+                <span>impacthon <span class="text-signal-mint">2026</span></span>
+            </div>
+        </div>
+    </div>
+
     {{-- Navbar --}}
-    <nav class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur-lg">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav class="sticky top-0 z-50 border-b border-ink-700 bg-ink-950/85 backdrop-blur-lg">
+        <div class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between">
-                <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600">
-                        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </div>
-                    <span class="text-lg font-bold text-white">Proteinux</span>
+                <a href="{{ route('home') }}" class="flex items-center gap-3">
+                    <img src="{{ asset('logo/LogoProteinUX.svg') }}" alt="Proteinux" class="h-9 w-auto">
+                    <span class="hidden font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400 sm:inline">structure prediction · v0.1</span>
                 </a>
 
                 <div class="flex items-center gap-1">
                     <a href="{{ route('home') }}"
-                       class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('home') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' }}">
-                        Home
+                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('home') ? 'text-signal-mint' : 'text-ink-300 hover:text-ink-50' }}">
+                        / overview
                     </a>
                     <a href="{{ route('proteins.index') }}"
-                       class="rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('proteins.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white' }}">
-                        Catalog
+                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'text-signal-mint' : 'text-ink-300 hover:text-ink-50' }}">
+                        / catalog
                     </a>
-                    <a href="{{ route('jobs.create') }}"
-                       class="ml-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-teal-500">
-                        Submit Job
+                    <a href="{{ route('jobs.create') }}" class="ml-3 btn-primary">
+                        <span class="status-dot bg-signal-mint"></span>
+                        submit job
                     </a>
                 </div>
             </div>
@@ -49,13 +67,13 @@
 
     {{-- Flash messages --}}
     @if(session('success'))
-        <div class="mx-auto max-w-7xl px-4 pt-4">
+        <div class="mx-auto max-w-[1400px] px-4 pt-4 sm:px-6 lg:px-8">
             <x-alert type="success" :message="session('success')" />
         </div>
     @endif
 
     @if($errors->has('api'))
-        <div class="mx-auto max-w-7xl px-4 pt-4">
+        <div class="mx-auto max-w-[1400px] px-4 pt-4 sm:px-6 lg:px-8">
             <x-alert type="error" :message="$errors->first('api')" />
         </div>
     @endif
@@ -66,10 +84,25 @@
     </main>
 
     {{-- Footer --}}
-    <footer class="mt-auto border-t border-slate-800 py-8">
-        <div class="mx-auto max-w-7xl px-4 text-center text-sm text-slate-500">
-            <p>Proteinux &mdash; IMPACTHON 2026 &middot; Cathedra CAMELIA Medicina Personalizada</p>
-            <p class="mt-1">Powered by CESGA Finis Terrae III Simulator</p>
+    <footer class="mt-16 border-t border-ink-700 bg-ink-950/60">
+        <div class="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+            <div class="grid gap-6 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-400 sm:grid-cols-3">
+                <div>
+                    <div class="text-ink-200">proteinux</div>
+                    <div class="mt-1">impacthon 2026 · cathedra camelia</div>
+                    <div class="mt-1">medicina personalizada</div>
+                </div>
+                <div>
+                    <div class="text-ink-200">infrastructure</div>
+                    <div class="mt-1">cesga finis terrae iii</div>
+                    <div class="mt-1">alphafold2 · 3dmol.js · laravel 13</div>
+                </div>
+                <div class="sm:text-right">
+                    <div class="text-ink-200">build</div>
+                    <div class="mt-1">{{ substr(md5(config('app.name').now()->format('Y-m-d')), 0, 12) }}</div>
+                    <div class="mt-1">{{ now()->format('Y-m-d') }} · open access</div>
+                </div>
+            </div>
         </div>
     </footer>
 

@@ -15,6 +15,15 @@
     <script src="https://3Dmol.org/build/3Dmol-min.js" defer></script>
 
     @stack('head')
+
+    {{-- Microsoft Clarity analytics --}}
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "w9nx0k6fda");
+    </script>
 </head>
 <body class="min-h-screen antialiased">
 

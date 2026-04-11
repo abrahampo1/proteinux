@@ -1,13 +1,16 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "abrahampo1/proteinux",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Proteinux — AlphaFold2 protein structure prediction UI with AI-assisted analysis (CESGA Finis Terrae III).",
     "keywords": [
-        "laravel",
-        "framework"
+        "proteinux",
+        "alphafold",
+        "bioinformatics",
+        "cesga",
+        "laravel"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
         "php": "^8.3",
         "laravel/framework": "^13.0",

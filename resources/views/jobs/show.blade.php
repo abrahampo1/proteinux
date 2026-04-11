@@ -487,19 +487,20 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
 
     viewer.addModel(resolvedPdb, 'pdb', { keepH: true });
 
-    // Teñir cada átomo según el pLDDT de su residuo.
-    // IMPORTANTE: 3Dmol soporta colorfunc solo para sphere/surface — para
-    // cartoon y stick necesitamos fijar atom.color directamente antes de
-    // aplicar el estilo, y en el estilo NO especificar color/colorscheme.
-    const atoms = viewer.getModel(0).selectedAtoms({});
-    atoms.forEach(atom => {
+    const model = viewer.getModel(0);
+
+    // Inyectamos el pLDDT en el campo b de cada átomo. El colorscheme del
+    // estilo (ver setViewerStyle) lee prop:'b' y aplica el gradiente pLDDT
+    // definido abajo. Forzamos la invalidación de la caché de geometría
+    // llamando a setColorByFunction (aunque devuelva el color existente,
+    // su efecto secundario es model.molObj = null, que obliga a cartoon/
+    // stick a reconstruir la malla con los nuevos atom.b).
+    model.setColorByFunction({}, function (atom) {
         const resIdx = atom.resi - 1;
-        let plddt = atom.b || 0;
         if (currentPlddt && currentPlddt.length > 0 && resIdx >= 0 && resIdx < currentPlddt.length) {
-            plddt = currentPlddt[resIdx];
+            atom.b = currentPlddt[resIdx];
         }
-        atom.b = plddt;
-        atom.color = plddtToHexNumber(plddt);
+        return plddtToHexNumber(atom.b || 0);
     });
 
     setViewerStyle('cartoon');
@@ -545,13 +546,37 @@ window.addEventListener('resize', () => {
 
 let currentStyle = 'cartoon';
 
-// Convierte un pLDDT (0–100) al color AlphaFold, como número hex para
-// poder asignarlo directamente a atom.color (3Dmol usa ese campo).
+// pLDDT → color AlphaFold, como número hex
 function plddtToHexNumber(p) {
+    if (p == null) return 0xffffff;
     if (p >= 90) return 0x0053D6;
     if (p >= 70) return 0x65CBF3;
     if (p >= 50) return 0xFFDB13;
     return 0xFF7D45;
+}
+
+// Gradiente custom que extiende $3Dmol.GradientType para poder pasarlo
+// como `gradient` dentro de `colorscheme: {prop:'b', gradient: ...}`.
+// Esta es la única vía documentada que funciona uniformemente en todos
+// los estilos (cartoon, stick, sphere, surface, line). La
+// comprobación `instanceof GradientType` dentro de getColorFromStyle
+// exige que heredemos del tipo base.
+let _plddtGradient = null;
+function getPlddtGradient() {
+    if (_plddtGradient) return _plddtGradient;
+    if (!window.$3Dmol || !$3Dmol.GradientType) return null;
+    class PlddtGradient extends $3Dmol.GradientType {
+        range() { return [0, 100]; }
+        valueToHex(val) {
+            return plddtToHexNumber(val);
+        }
+    }
+    _plddtGradient = new PlddtGradient();
+    return _plddtGradient;
+}
+
+function plddtColorscheme() {
+    return { prop: 'b', gradient: getPlddtGradient() };
 }
 
 function setViewerStyle(style) {
@@ -562,17 +587,18 @@ function setViewerStyle(style) {
     viewer.setStyle({}, {});
     viewer.removeAllSurfaces();
 
-    // Ocultar aguas y ligar HETATM como sticks gris tenue
+    // Ocultar aguas; HETATM restantes como stick gris tenue
     viewer.setStyle({ resn: 'HOH' }, {});
-    viewer.setStyle({ hetflag: true, byres: true }, {
+    viewer.setStyle({ hetflag: true }, {
         stick: { color: 0x94908a, radius: 0.18 },
     });
 
-    // Para cartoon/stick: NO especificamos color ni colorscheme — 3Dmol usa
-    // atom.color, que ya hemos teñido con el pLDDT en init3DViewer.
+    const scheme = plddtColorscheme();
+
     if (style === 'cartoon') {
         viewer.setStyle({ hetflag: false }, {
             cartoon: {
+                colorscheme: scheme,
                 thickness: 0.4,
                 arrows: true,
                 style: 'rectangle',
@@ -581,8 +607,9 @@ function setViewerStyle(style) {
         });
     } else if (style === 'stick') {
         viewer.setStyle({ hetflag: false }, {
-            stick: { radius: 0.22 },
+            stick: { colorscheme: scheme, radius: 0.22 },
             cartoon: {
+                colorscheme: scheme,
                 thickness: 0.15,
                 opacity: 0.35,
                 style: 'rectangle',
@@ -590,26 +617,20 @@ function setViewerStyle(style) {
         });
     } else if (style === 'sphere') {
         viewer.setStyle({ hetflag: false }, {
-            sphere: { scale: 0.32 },
+            sphere: { colorscheme: scheme, scale: 0.32 },
         });
     } else if (style === 'surface') {
         viewer.setStyle({ hetflag: false }, {
             cartoon: {
+                colorscheme: scheme,
                 thickness: 0.4,
                 arrows: true,
                 style: 'rectangle',
             },
         });
-        // Superficie VDW semitransparente; la coloreamos residuo a residuo
-        // vía colorfunc (superficies sí lo aceptan).
         viewer.addSurface(
             $3Dmol.SurfaceType.VDW,
-            {
-                opacity: 0.72,
-                colorfunc: function (atom) {
-                    return plddtToHexNumber(atom.b || 0);
-                },
-            },
+            { opacity: 0.72, colorscheme: scheme },
             { hetflag: false },
         );
     }

@@ -23,6 +23,7 @@ class JobSubmitRequest extends FormRequest
             'gpus' => ['sometimes', 'integer', 'min:0', 'max:4'],
             'cpus' => ['sometimes', 'integer', 'min:1', 'max:64'],
             'memory_gb' => ['sometimes', 'numeric', 'min:0.1', 'max:256'],
+            'force' => ['sometimes', 'boolean'],
         ];
     }
 

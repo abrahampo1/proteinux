@@ -348,6 +348,17 @@
                     </div>
                 </section>
 
+                @if(isset($libraryEntry) && $libraryEntry)
+                    <form action="{{ route('library.rerun', $libraryEntry) }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                                class="btn-secondary block w-full justify-center text-center"
+                                onclick="return confirm('¿Relanzar esta predicción? Consumirá GPU nueva en el CESGA.')">
+                            ↻ ejecutar de nuevo
+                        </button>
+                    </form>
+                @endif
+
                 <a href="{{ route('jobs.create') }}" class="btn-secondary block w-full justify-center text-center">
                     + nuevo envío
                 </a>

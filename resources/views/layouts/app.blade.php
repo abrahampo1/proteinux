@@ -71,6 +71,10 @@
                        class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / catálogo
                     </a>
+                    <a href="{{ route('library.index') }}"
+                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('library.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                        / biblioteca
+                    </a>
                     <a href="{{ route('settings.ai') }}"
                        class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / ajustes ia
@@ -108,6 +112,10 @@
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / catálogo
                     </a>
+                    <a href="{{ route('library.index') }}"
+                       class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('library.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
+                        / biblioteca
+                    </a>
                     <a href="{{ route('settings.ai') }}"
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / ajustes ia
@@ -125,6 +133,12 @@
     @if(session('success'))
         <div class="mx-auto max-w-[1400px] px-4 pt-4 sm:px-6 lg:px-8">
             <x-alert type="success" :message="session('success')" />
+        </div>
+    @endif
+
+    @if(session('info'))
+        <div class="mx-auto max-w-[1400px] px-4 pt-4 sm:px-6 lg:px-8">
+            <x-alert type="info" :message="session('info')" />
         </div>
     @endif
 

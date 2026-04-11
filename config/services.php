@@ -40,4 +40,35 @@ return [
         'timeout' => (int) env('CESGA_API_TIMEOUT', 45),
     ],
 
+    'llm' => [
+        'timeout' => (int) env('LLM_TIMEOUT', 60),
+        'anthropic' => [
+            'base_url' => env('ANTHROPIC_API_URL', 'https://api.anthropic.com'),
+            'default_model' => env('ANTHROPIC_DEFAULT_MODEL', 'claude-sonnet-4-5'),
+            'models' => [
+                'claude-opus-4-5',
+                'claude-sonnet-4-5',
+                'claude-haiku-4-5',
+            ],
+        ],
+        'openai' => [
+            'base_url' => env('OPENAI_API_URL', 'https://api.openai.com'),
+            'default_model' => env('OPENAI_DEFAULT_MODEL', 'gpt-4o-mini'),
+            'models' => [
+                'gpt-4o',
+                'gpt-4o-mini',
+                'o1-mini',
+            ],
+        ],
+        'gemini' => [
+            'base_url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com'),
+            'default_model' => env('GEMINI_DEFAULT_MODEL', 'gemini-2.0-flash'),
+            'models' => [
+                'gemini-2.0-flash',
+                'gemini-1.5-pro',
+                'gemini-1.5-flash',
+            ],
+        ],
+    ],
+
 ];

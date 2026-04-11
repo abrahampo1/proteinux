@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="ai-configured" content="{{ app(\App\Support\Ai\AiSettings::class)->isConfigured() ? 'true' : 'false' }}">
     <title>@yield('title', 'Proteinux') · Predicción de estructuras proteicas</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -57,6 +58,10 @@
                        class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / catálogo
                     </a>
+                    <a href="{{ route('settings.ai') }}"
+                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                        / ajustes ia
+                    </a>
                     <a href="{{ route('jobs.create') }}" class="ml-3 btn-primary">
                         <span class="status-dot bg-signal-mint"></span>
                         enviar trabajo
@@ -89,6 +94,10 @@
                     <a href="{{ route('proteins.index') }}"
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / catálogo
+                    </a>
+                    <a href="{{ route('settings.ai') }}"
+                       class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
+                        / ajustes ia
                     </a>
                     <a href="{{ route('jobs.create') }}" class="mt-2 btn-primary w-full justify-center">
                         <span class="status-dot bg-signal-mint"></span>

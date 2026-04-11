@@ -233,6 +233,57 @@
                 </a>
             </aside>
         </div>
+
+        {{-- ─────────── ANÁLISIS CON IA ─────────── --}}
+        <section id="ai-analysis-panel" class="panel mt-6 p-4 sm:mt-8 sm:p-6">
+            <div class="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+                <div class="label-tag">§ interpretación ia</div>
+                <span id="ai-analysis-meta" class="font-mono text-[10px] uppercase tracking-wider text-ink-400"></span>
+            </div>
+
+            <div id="ai-analysis-loading" class="hidden flex items-center gap-3 font-mono text-xs uppercase tracking-wider text-ink-500">
+                <x-loading-spinner size="sm" />
+                analizando resultados con ia…
+            </div>
+
+            <div id="ai-analysis-cta" class="hidden border-l-2 border-signal-mint/50 bg-ink-100/60 px-5 py-4">
+                <p class="font-serif text-sm leading-relaxed text-ink-700">
+                    Configura tu API key (Anthropic, OpenAI o Gemini) en
+                    <a href="{{ route('settings.ai') }}" class="font-mono text-signal-mint hover:underline">/ajustes-ia</a>
+                    para ver un análisis interpretativo de estos resultados y preguntar sobre los datos.
+                </p>
+            </div>
+
+            <div id="ai-analysis-error" class="hidden border-l-2 border-signal-rust/60 bg-signal-rust/5 px-5 py-4">
+                <p class="font-mono text-xs text-signal-rust"></p>
+            </div>
+
+            <pre id="ai-analysis-body" class="hidden whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed text-ink-800"></pre>
+        </section>
+
+        {{-- ─────────── CHAT Q&A ─────────── --}}
+        <section id="ai-chat-panel" class="panel mt-4 p-4 sm:p-6 {{ $outputs ? '' : 'hidden' }}">
+            <div class="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+                <div class="label-tag">§ preguntas sobre los datos</div>
+                <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">historial sólo en memoria</span>
+            </div>
+
+            <div id="ai-chat-messages" class="mb-4 space-y-3 max-h-[480px] overflow-y-auto pr-2"></div>
+
+            <form id="ai-chat-form" class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                <label class="sr-only" for="ai-chat-input">Pregunta</label>
+                <textarea id="ai-chat-input" rows="2"
+                          placeholder="¿Por qué el PAE es alto en el dominio central?"
+                          class="input-lab flex-1 resize-y"></textarea>
+                <button type="submit" id="ai-chat-send" class="btn-primary shrink-0 justify-center sm:w-auto">
+                    <span class="status-dot bg-signal-mint"></span>
+                    enviar
+                </button>
+            </form>
+            <p id="ai-chat-hint" class="mt-2 font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                enter para enviar · shift+enter para salto de línea
+            </p>
+        </section>
     </div>
 
     {{-- ─────────── FALLIDO ─────────── --}}
@@ -396,6 +447,9 @@ function renderResults() {
     if (currentAccounting) {
         renderAccounting(currentAccounting);
     }
+
+    loadAiAnalysis();
+    setupAiChat();
 }
 
 // ====== VISOR 3D ======
@@ -1003,6 +1057,145 @@ function downloadFile(type) {
     a.download = `structure.${type === 'pdb' ? 'pdb' : 'cif'}`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// ====== ANÁLISIS IA ======
+let aiAnalysisLoaded = false;
+let chatHistory = [];
+
+function isAiConfigured() {
+    const meta = document.querySelector('meta[name="ai-configured"]');
+    return meta && meta.getAttribute('content') === 'true';
+}
+
+function showAiState(state) {
+    const states = ['ai-analysis-loading', 'ai-analysis-cta', 'ai-analysis-error', 'ai-analysis-body'];
+    states.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === state) {
+            el.classList.remove('hidden');
+            if (id === 'ai-analysis-loading') el.classList.add('flex');
+        } else {
+            el.classList.add('hidden');
+            if (id === 'ai-analysis-loading') el.classList.remove('flex');
+        }
+    });
+}
+
+async function loadAiAnalysis() {
+    if (aiAnalysisLoaded) return;
+
+    if (!isAiConfigured()) {
+        showAiState('ai-analysis-cta');
+        document.getElementById('ai-chat-panel').classList.add('hidden');
+        return;
+    }
+
+    aiAnalysisLoaded = true;
+    showAiState('ai-analysis-loading');
+
+    try {
+        const resp = await axios.get(`/api/jobs/${jobId}/ai-analysis`);
+        const body = document.getElementById('ai-analysis-body');
+        body.textContent = resp.data.analysis || '';
+        showAiState('ai-analysis-body');
+        document.getElementById('ai-analysis-meta').textContent =
+            `via ${resp.data.provider || ''} · ${resp.data.model || ''}`;
+    } catch (err) {
+        aiAnalysisLoaded = false;
+        const errBox = document.getElementById('ai-analysis-error');
+        const msg = err.response?.data?.error || 'No se pudo generar el análisis.';
+        errBox.querySelector('p').textContent = msg;
+        showAiState('ai-analysis-error');
+        if (err.response?.status === 409) {
+            document.getElementById('ai-chat-panel').classList.add('hidden');
+        }
+    }
+}
+
+// ====== CHAT Q&A ======
+function setupAiChat() {
+    const form = document.getElementById('ai-chat-form');
+    const input = document.getElementById('ai-chat-input');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+
+    if (!isAiConfigured()) {
+        document.getElementById('ai-chat-panel').classList.add('hidden');
+        return;
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendChatMessage();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+}
+
+function renderChatMessage(role, content) {
+    const container = document.getElementById('ai-chat-messages');
+    const isUser = role === 'user';
+    const wrapper = document.createElement('div');
+    wrapper.className = isUser
+        ? 'ml-auto max-w-[85%] border-l-2 border-ink-400 bg-ink-100/60 px-4 py-3'
+        : 'mr-auto max-w-[90%] border-l-2 border-signal-mint bg-signal-mint/5 px-4 py-3';
+
+    const label = document.createElement('div');
+    label.className = 'mb-1 font-mono text-[10px] uppercase tracking-wider ' + (isUser ? 'text-ink-500' : 'text-signal-mint-deep');
+    label.textContent = isUser ? '> tú' : '· asistente';
+    wrapper.appendChild(label);
+
+    const body = document.createElement('div');
+    body.className = 'whitespace-pre-wrap font-serif text-[14px] leading-relaxed text-ink-800';
+    body.textContent = content;
+    wrapper.appendChild(body);
+
+    container.appendChild(wrapper);
+    container.scrollTop = container.scrollHeight;
+    return wrapper;
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('ai-chat-input');
+    const button = document.getElementById('ai-chat-send');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.disabled = true;
+    button.disabled = true;
+    button.style.opacity = '0.6';
+
+    chatHistory.push({ role: 'user', content: text });
+    renderChatMessage('user', text);
+
+    const pending = renderChatMessage('assistant', '…');
+
+    try {
+        const resp = await axios.post(`/api/jobs/${jobId}/ai-chat`, {
+            messages: chatHistory,
+        });
+        const reply = resp.data.reply || '';
+        pending.querySelector('div:last-child').textContent = reply;
+        chatHistory.push({ role: 'assistant', content: reply });
+    } catch (err) {
+        const msg = err.response?.data?.error || 'No se pudo obtener respuesta.';
+        pending.querySelector('div:last-child').textContent = '[error] ' + msg;
+        pending.className = 'mr-auto max-w-[90%] border-l-2 border-signal-rust/60 bg-signal-rust/5 px-4 py-3';
+        chatHistory.pop();
+    } finally {
+        input.disabled = false;
+        button.disabled = false;
+        button.style.opacity = '1';
+        input.focus();
+    }
 }
 
 // ====== INIT ======

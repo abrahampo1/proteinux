@@ -73,3 +73,38 @@ it('rejects an invalid provider', function () {
         'providers' => [],
     ])->assertSessionHasErrors('active_provider');
 });
+
+it('auto-selects the provider that received a key when active_provider is omitted', function () {
+    $this->post('/ajustes-ia', [
+        'providers' => [
+            'openai' => ['api_key' => 'sk-new', 'model' => 'gpt-4o-mini'],
+        ],
+    ])->assertRedirect('/ajustes-ia');
+
+    $settings = app(AiSettings::class);
+
+    expect($settings->isConfigured())->toBeTrue()
+        ->and($settings->activeProvider())->toBe('openai');
+});
+
+it('falls back to any provider with a key if active becomes invalid', function () {
+    $settings = app(AiSettings::class);
+    $settings->save([
+        'active_provider' => 'anthropic',
+        'providers' => [
+            'anthropic' => ['api_key' => 'sk-ant', 'model' => 'claude-sonnet-4-5'],
+            'gemini' => ['api_key' => 'g-key', 'model' => 'gemini-2.0-flash'],
+        ],
+    ]);
+
+    $settings->clear('anthropic');
+
+    $settings->save([
+        'providers' => [
+            'gemini' => ['model' => 'gemini-1.5-pro'],
+        ],
+    ]);
+
+    expect($settings->activeProvider())->toBe('gemini')
+        ->and($settings->isConfigured())->toBeTrue();
+});

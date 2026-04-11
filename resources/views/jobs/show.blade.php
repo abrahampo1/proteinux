@@ -1063,11 +1063,6 @@ function downloadFile(type) {
 let aiAnalysisLoaded = false;
 let chatHistory = [];
 
-function isAiConfigured() {
-    const meta = document.querySelector('meta[name="ai-configured"]');
-    return meta && meta.getAttribute('content') === 'true';
-}
-
 function showAiState(state) {
     const states = ['ai-analysis-loading', 'ai-analysis-cta', 'ai-analysis-error', 'ai-analysis-body'];
     states.forEach(id => {
@@ -1085,14 +1080,8 @@ function showAiState(state) {
 
 async function loadAiAnalysis() {
     if (aiAnalysisLoaded) return;
-
-    if (!isAiConfigured()) {
-        showAiState('ai-analysis-cta');
-        document.getElementById('ai-chat-panel').classList.add('hidden');
-        return;
-    }
-
     aiAnalysisLoaded = true;
+
     showAiState('ai-analysis-loading');
 
     try {
@@ -1102,15 +1091,18 @@ async function loadAiAnalysis() {
         showAiState('ai-analysis-body');
         document.getElementById('ai-analysis-meta').textContent =
             `via ${resp.data.provider || ''} · ${resp.data.model || ''}`;
+        document.getElementById('ai-chat-panel').classList.remove('hidden');
     } catch (err) {
         aiAnalysisLoaded = false;
+        if (err.response?.status === 409) {
+            showAiState('ai-analysis-cta');
+            document.getElementById('ai-chat-panel').classList.add('hidden');
+            return;
+        }
         const errBox = document.getElementById('ai-analysis-error');
         const msg = err.response?.data?.error || 'No se pudo generar el análisis.';
         errBox.querySelector('p').textContent = msg;
         showAiState('ai-analysis-error');
-        if (err.response?.status === 409) {
-            document.getElementById('ai-chat-panel').classList.add('hidden');
-        }
     }
 }
 
@@ -1120,11 +1112,6 @@ function setupAiChat() {
     const input = document.getElementById('ai-chat-input');
     if (!form || form.dataset.bound) return;
     form.dataset.bound = '1';
-
-    if (!isAiConfigured()) {
-        document.getElementById('ai-chat-panel').classList.add('hidden');
-        return;
-    }
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();

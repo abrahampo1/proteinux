@@ -84,6 +84,8 @@ class AiSettings
         $data = $this->raw();
         $data['providers'] ??= [];
 
+        $lastAddedKey = null;
+
         foreach (self::PROVIDERS as $provider) {
             $incoming = $input['providers'][$provider] ?? [];
 
@@ -92,6 +94,7 @@ class AiSettings
             $newKey = $incoming['api_key'] ?? null;
             if (is_string($newKey) && trim($newKey) !== '') {
                 $providerData['key_enc'] = Crypt::encryptString(trim($newKey));
+                $lastAddedKey = $provider;
             }
 
             $newModel = $incoming['model'] ?? null;
@@ -106,7 +109,31 @@ class AiSettings
             $data['active_provider'] = $input['active_provider'];
         }
 
+        $currentActive = $data['active_provider'] ?? null;
+        $activeIsUsable = is_string($currentActive)
+            && isset($data['providers'][$currentActive]['key_enc'])
+            && $data['providers'][$currentActive]['key_enc'] !== '';
+
+        if (! $activeIsUsable) {
+            $data['active_provider'] = $lastAddedKey ?? $this->firstProviderWithKey($data);
+        }
+
         $this->session->put(self::SESSION_KEY, $data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function firstProviderWithKey(array $data): ?string
+    {
+        foreach (self::PROVIDERS as $provider) {
+            $enc = $data['providers'][$provider]['key_enc'] ?? null;
+            if (is_string($enc) && $enc !== '') {
+                return $provider;
+            }
+        }
+
+        return null;
     }
 
     public function clear(string $provider): void

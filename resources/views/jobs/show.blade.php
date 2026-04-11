@@ -487,16 +487,20 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
 
     viewer.addModel(resolvedPdb, 'pdb', { keepH: true });
 
-    // Asignar pLDDT por residuo a cada átomo (usamos el b-factor)
+    // Teñir cada átomo según el pLDDT de su residuo.
+    // IMPORTANTE: 3Dmol soporta colorfunc solo para sphere/surface — para
+    // cartoon y stick necesitamos fijar atom.color directamente antes de
+    // aplicar el estilo, y en el estilo NO especificar color/colorscheme.
     const atoms = viewer.getModel(0).selectedAtoms({});
-    if (currentPlddt && currentPlddt.length > 0) {
-        atoms.forEach(atom => {
-            const resIdx = atom.resi - 1;
-            if (resIdx >= 0 && resIdx < currentPlddt.length) {
-                atom.b = currentPlddt[resIdx];
-            }
-        });
-    }
+    atoms.forEach(atom => {
+        const resIdx = atom.resi - 1;
+        let plddt = atom.b || 0;
+        if (currentPlddt && currentPlddt.length > 0 && resIdx >= 0 && resIdx < currentPlddt.length) {
+            plddt = currentPlddt[resIdx];
+        }
+        atom.b = plddt;
+        atom.color = plddtToHexNumber(plddt);
+    });
 
     setViewerStyle('cartoon');
 
@@ -541,20 +545,13 @@ window.addEventListener('resize', () => {
 
 let currentStyle = 'cartoon';
 
-function plddtColorFunc(atom) {
-    // Preferimos el pLDDT indexado por residuo (cuando usamos el PDB real
-    // el b-factor es el factor B cristalográfico, no pLDDT).
-    let b = atom.b || 0;
-    if (currentPlddt && currentPlddt.length > 0) {
-        const idx = atom.resi - 1;
-        if (idx >= 0 && idx < currentPlddt.length) {
-            b = currentPlddt[idx];
-        }
-    }
-    if (b >= 90) return PLDDT_COLORS.veryHigh;
-    if (b >= 70) return PLDDT_COLORS.high;
-    if (b >= 50) return PLDDT_COLORS.medium;
-    return PLDDT_COLORS.low;
+// Convierte un pLDDT (0–100) al color AlphaFold, como número hex para
+// poder asignarlo directamente a atom.color (3Dmol usa ese campo).
+function plddtToHexNumber(p) {
+    if (p >= 90) return 0x0053D6;
+    if (p >= 70) return 0x65CBF3;
+    if (p >= 50) return 0xFFDB13;
+    return 0xFF7D45;
 }
 
 function setViewerStyle(style) {
@@ -565,28 +562,27 @@ function setViewerStyle(style) {
     viewer.setStyle({}, {});
     viewer.removeAllSurfaces();
 
-    // HETATM (ligandos, cofactores, aguas) siempre como stick en gris tenue
-    viewer.setStyle({ hetflag: true, resn: 'HOH' }, {}); // ocultar aguas
-    viewer.setStyle({ hetflag: true }, {
-        stick: { color: '#94908a', radius: 0.18 },
+    // Ocultar aguas y ligar HETATM como sticks gris tenue
+    viewer.setStyle({ resn: 'HOH' }, {});
+    viewer.setStyle({ hetflag: true, byres: true }, {
+        stick: { color: 0x94908a, radius: 0.18 },
     });
 
+    // Para cartoon/stick: NO especificamos color ni colorscheme — 3Dmol usa
+    // atom.color, que ya hemos teñido con el pLDDT en init3DViewer.
     if (style === 'cartoon') {
         viewer.setStyle({ hetflag: false }, {
             cartoon: {
-                colorfunc: plddtColorFunc,
                 thickness: 0.4,
                 arrows: true,
-                tubes: false,
                 style: 'rectangle',
                 opacity: 1.0,
             },
         });
     } else if (style === 'stick') {
         viewer.setStyle({ hetflag: false }, {
-            stick: { colorfunc: plddtColorFunc, radius: 0.22 },
+            stick: { radius: 0.22 },
             cartoon: {
-                colorfunc: plddtColorFunc,
                 thickness: 0.15,
                 opacity: 0.35,
                 style: 'rectangle',
@@ -594,22 +590,26 @@ function setViewerStyle(style) {
         });
     } else if (style === 'sphere') {
         viewer.setStyle({ hetflag: false }, {
-            sphere: { colorfunc: plddtColorFunc, scale: 0.32 },
+            sphere: { scale: 0.32 },
         });
     } else if (style === 'surface') {
-        // Cartoon por debajo como referencia estructural
         viewer.setStyle({ hetflag: false }, {
             cartoon: {
-                colorfunc: plddtColorFunc,
                 thickness: 0.4,
                 arrows: true,
                 style: 'rectangle',
             },
         });
-        // Superficie VDW semitransparente, coloreada por pLDDT
+        // Superficie VDW semitransparente; la coloreamos residuo a residuo
+        // vía colorfunc (superficies sí lo aceptan).
         viewer.addSurface(
             $3Dmol.SurfaceType.VDW,
-            { opacity: 0.72, colorfunc: plddtColorFunc },
+            {
+                opacity: 0.72,
+                colorfunc: function (atom) {
+                    return plddtToHexNumber(atom.b || 0);
+                },
+            },
             { hetflag: false },
         );
     }

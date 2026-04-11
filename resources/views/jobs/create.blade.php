@@ -3,12 +3,12 @@
 @section('title', 'Enviar trabajo de predicción')
 
 @section('content')
-<div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
 
     {{-- Cabecera --}}
-    <header class="mb-10 border-b border-ink-300 pb-6">
+    <header class="mb-8 border-b border-ink-300 pb-6 sm:mb-10">
         <div class="label-tag">sección 04 · envío de trabajo</div>
-        <h1 class="mt-3 font-serif text-4xl text-ink-900">Enviar predicción</h1>
+        <h1 class="mt-3 font-serif text-3xl text-ink-900 sm:text-4xl">Enviar predicción</h1>
         <p class="mt-3 max-w-2xl font-serif text-sm leading-relaxed text-ink-600">
             Pega una secuencia proteica monocadena en formato FASTA. El trabajo se
             despachará a la partición GPU del CESGA Finis Terrae&nbsp;III y la
@@ -16,7 +16,7 @@
         </p>
     </header>
 
-    <form action="{{ route('jobs.store') }}" method="POST" id="submit-form" class="space-y-10">
+    <form action="{{ route('jobs.store') }}" method="POST" id="submit-form" class="space-y-8 sm:space-y-10">
         @csrf
 
         {{-- Selector de muestra --}}
@@ -40,11 +40,11 @@
 
         {{-- FASTA --}}
         <fieldset>
-            <div class="mb-2 flex items-center justify-between">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <legend class="label-tag">§ 2 — secuencia fasta <sup class="text-signal-mint">[1]</sup></legend>
-                <span id="char-count" class="font-mono text-[10px] uppercase tracking-wider text-ink-400 tabular-nums">0 caracteres</span>
+                <span id="char-count" class="font-mono text-[10px] uppercase tracking-wider tabular-nums text-ink-400">0 caracteres</span>
             </div>
-            <textarea name="fasta_sequence" id="fasta_sequence" rows="10"
+            <textarea name="fasta_sequence" id="fasta_sequence" rows="8"
                       class="input-lab leading-relaxed @error('fasta_sequence') !border-signal-rust @enderror"
                       placeholder=">sp|P0CG47|UBQ_HUMAN Ubiquitin OS=Homo sapiens&#10;MQIFVKTLTGKTITLEVEPSDTIENVKAKIQDKEGIPPDQQRLIFAGKQLEDGRTLSDYNIQKESTLHLVLRLRGG"
             >{{ old('fasta_sequence', $prefillFasta ?? '') }}</textarea>
@@ -80,27 +80,27 @@ MQIFVKTLTGKTITLEVEPSDTIENK...</pre>
 
         {{-- Parámetros HPC --}}
         <fieldset class="border border-ink-300">
-            <legend class="ml-3 px-2 bg-ink-50">
+            <legend class="ml-3 bg-ink-50 px-2">
                 <span class="label-tag">§ 4 — parámetros hpc · opcional</span>
             </legend>
-            <div class="grid grid-cols-3 gap-px bg-ink-300">
+            <div class="grid grid-cols-1 gap-px bg-ink-300 sm:grid-cols-3">
                 <label class="bg-ink-100 p-4">
                     <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">gpus · a100</span>
                     <input type="number" name="gpus" id="gpus" value="{{ old('gpus', 1) }}" min="0" max="4"
-                           class="mt-1 w-full bg-transparent font-mono text-2xl text-ink-900 tabular-nums focus:outline-none">
+                           class="mt-1 w-full bg-transparent font-mono text-xl tabular-nums text-ink-900 focus:outline-none sm:text-2xl">
                 </label>
                 <label class="bg-ink-100 p-4">
                     <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">cpus · núcleos</span>
                     <input type="number" name="cpus" id="cpus" value="{{ old('cpus', 8) }}" min="1" max="64"
-                           class="mt-1 w-full bg-transparent font-mono text-2xl text-ink-900 tabular-nums focus:outline-none">
+                           class="mt-1 w-full bg-transparent font-mono text-xl tabular-nums text-ink-900 focus:outline-none sm:text-2xl">
                 </label>
                 <label class="bg-ink-100 p-4">
                     <span class="font-mono text-[10px] uppercase tracking-wider text-ink-500">memoria · gb</span>
                     <input type="number" name="memory_gb" id="memory_gb" value="{{ old('memory_gb', 32) }}" min="1" max="256" step="0.1"
-                           class="mt-1 w-full bg-transparent font-mono text-2xl text-ink-900 tabular-nums focus:outline-none">
+                           class="mt-1 w-full bg-transparent font-mono text-xl tabular-nums text-ink-900 focus:outline-none sm:text-2xl">
                 </label>
             </div>
-            <p class="border-t border-ink-300 bg-ink-100/60 px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-ink-400">
+            <p class="border-t border-ink-300 bg-ink-100/60 px-4 py-2 font-mono text-[10px] uppercase leading-relaxed tracking-wider text-ink-400">
                 los valores por defecto están calibrados para proteínas de menos de 1 024 residuos
             </p>
         </fieldset>

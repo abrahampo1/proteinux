@@ -6,21 +6,21 @@
 
 {{-- ───────────────────────── HERO ───────────────────────── --}}
 <section class="relative border-b border-ink-300">
-    <div class="mx-auto grid max-w-[1400px] gap-12 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8 lg:py-24">
+    <div class="mx-auto grid max-w-[1400px] gap-10 px-4 py-12 sm:gap-12 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-16 lg:px-8 lg:py-24">
 
         {{-- Izquierda: bloque de título --}}
         <div class="lg:col-span-7">
-            <div class="label-tag mb-6">
+            <div class="label-tag mb-5 sm:mb-6">
                 <span>vol. 01 · nota 001</span>
             </div>
 
-            <h1 class="font-serif text-[2.5rem] leading-[1.05] text-ink-900 sm:text-6xl">
+            <h1 class="font-serif text-[2rem] leading-[1.08] text-ink-900 sm:text-5xl lg:text-6xl">
                 Predecimos la<br>
                 forma tridimensional<br>
                 de <span class="italic text-signal-mint">cualquier</span> proteína.
             </h1>
 
-            <p class="mt-8 max-w-xl font-serif text-lg leading-relaxed text-ink-700">
+            <p class="mt-6 max-w-xl font-serif text-base leading-relaxed text-ink-700 sm:mt-8 sm:text-lg">
                 Una interfaz web para inferencia con AlphaFold&thinsp;2 sobre el supercomputador
                 <span class="text-ink-900">CESGA Finis Terrae&nbsp;III</span>.
                 Envía una secuencia FASTA y recibe una estructura anotada con
@@ -28,17 +28,17 @@
                 Sin terminal, sin SLURM, sin ficheros de cola.
             </p>
 
-            <div class="mt-10 flex flex-wrap items-center gap-3">
-                <a href="{{ route('jobs.create') }}" class="btn-primary">
+            <div class="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center">
+                <a href="{{ route('jobs.create') }}" class="btn-primary w-full justify-center sm:w-auto">
                     → enviar secuencia
                 </a>
-                <a href="{{ route('proteins.index') }}" class="btn-secondary">
+                <a href="{{ route('proteins.index') }}" class="btn-secondary w-full justify-center sm:w-auto">
                     explorar catálogo
                 </a>
             </div>
 
             {{-- Línea tipo paper --}}
-            <div class="mt-10 border-t border-ink-300 pt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">
+            <div class="mt-8 border-t border-ink-300 pt-5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-ink-500 sm:mt-10">
                 <div>cátedra camelia · medicina personalizada</div>
                 <div class="mt-1">impacthon 2026 · galicia, españa · acceso abierto</div>
             </div>
@@ -46,15 +46,15 @@
 
         {{-- Derecha: lectura del instrumento --}}
         <div class="lg:col-span-5">
-            <div class="crosshair panel p-6">
-                <div class="mb-5 flex items-center justify-between">
+            <div class="crosshair panel p-5 sm:p-6">
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
                     <span class="label-tag">en vivo · clúster ft3</span>
                     <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">
                         {{ now()->format('Y-m-d H:i:s') }}
                     </span>
                 </div>
 
-                <img src="{{ asset('logo/LogoMol.svg') }}" alt="" class="mx-auto h-40 w-auto opacity-90">
+                <img src="{{ asset('logo/LogoMol.svg') }}" alt="" class="mx-auto h-32 w-auto opacity-90 sm:h-40">
 
                 <dl class="mt-6 space-y-0">
                     <div class="field">
@@ -86,22 +86,22 @@
 {{-- ───────────────────────── MÉTRICAS ───────────────────────── --}}
 @if($stats)
 <section class="border-b border-ink-300 panel-flush">
-    <div class="mx-auto grid max-w-[1400px] grid-cols-2 divide-x divide-ink-300 sm:grid-cols-4">
-        <div class="px-6 py-6 sm:px-8">
+    <div class="mx-auto grid max-w-[1400px] grid-cols-2 divide-x divide-y divide-ink-300 sm:grid-cols-4 sm:divide-y-0">
+        <div class="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">proteínas indexadas</div>
-            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ $stats['total_proteins'] ?? '—' }}</div>
+            <div class="mt-2 font-mono text-2xl text-ink-900 tabular-nums sm:text-3xl">{{ $stats['total_proteins'] ?? '—' }}</div>
         </div>
-        <div class="px-6 py-6 sm:px-8">
+        <div class="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">entradas curadas</div>
-            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ $stats['embedded_proteins'] ?? '—' }}</div>
+            <div class="mt-2 font-mono text-2xl text-ink-900 tabular-nums sm:text-3xl">{{ $stats['embedded_proteins'] ?? '—' }}</div>
         </div>
-        <div class="px-6 py-6 sm:px-8">
-            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">rango de longitud <span class="lowercase">/ aa</span></div>
-            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ $stats['min_length'] ?? '—' }}<span class="text-ink-400">–</span>{{ $stats['max_length'] ?? '—' }}</div>
+        <div class="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">rango <span class="lowercase">/ aa</span></div>
+            <div class="mt-2 font-mono text-2xl text-ink-900 tabular-nums sm:text-3xl">{{ $stats['min_length'] ?? '—' }}<span class="text-ink-400">–</span>{{ $stats['max_length'] ?? '—' }}</div>
         </div>
-        <div class="px-6 py-6 sm:px-8">
-            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">familias funcionales</div>
-            <div class="mt-2 font-mono text-3xl text-ink-900 tabular-nums">{{ count($stats['by_category'] ?? []) }}</div>
+        <div class="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+            <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">familias</div>
+            <div class="mt-2 font-mono text-2xl text-ink-900 tabular-nums sm:text-3xl">{{ count($stats['by_category'] ?? []) }}</div>
         </div>
     </div>
 </section>
@@ -109,10 +109,10 @@
 
 {{-- ───────────────────────── PROCEDIMIENTO ───────────────────────── --}}
 <section class="border-b border-ink-300">
-    <div class="mx-auto grid max-w-[1400px] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
+    <div class="mx-auto grid max-w-[1400px] gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div class="lg:col-span-3">
             <div class="label-tag">sección 02 · métodos</div>
-            <h2 class="mt-3 font-serif text-3xl text-ink-900">Procedimiento</h2>
+            <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Procedimiento</h2>
             <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
                 Tres etapas deterministas, todas transparentes: los datos entran, la
                 estructura sale. El estado del pipeline es visible en todo momento.
@@ -170,22 +170,48 @@
 {{-- ───────────────────────── TABLA DE MUESTRA ───────────────────────── --}}
 @if(!empty($samples))
 <section class="border-b border-ink-300">
-    <div class="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 lg:px-8">
-        <div class="mb-8 flex items-end justify-between gap-6">
+    <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div class="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
             <div>
                 <div class="label-tag">sección 03 · conjunto de referencia</div>
-                <h2 class="mt-3 font-serif text-3xl text-ink-900">Pruébalo con una proteína conocida</h2>
+                <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Pruébalo con una proteína conocida</h2>
                 <p class="mt-2 max-w-xl font-serif text-sm text-ink-600">
                     Entradas curadas con referencias cruzadas verificadas a UniProt y PDB.
                     Pulsa cualquier fila para enviar un trabajo de predicción usando su secuencia.
                 </p>
             </div>
-            <a href="{{ route('proteins.index') }}" class="hidden btn-secondary lg:inline-flex">
+            <a href="{{ route('proteins.index') }}" class="btn-secondary hidden lg:inline-flex">
                 catálogo completo →
             </a>
         </div>
 
-        <div class="panel overflow-hidden">
+        {{-- Vista en tarjetas · móvil --}}
+        <div class="space-y-3 md:hidden">
+            @foreach(array_slice($samples, 0, 8) as $i => $sample)
+                <a href="{{ route('jobs.create', ['fasta' => $sample['fasta_ready'] ?? $sample['fasta_sequence'] ?? '', 'filename' => strtolower(str_replace(' ', '_', $sample['protein_name'] ?? 'protein')) . '.fasta']) }}"
+                   class="block border border-ink-300 bg-ink-100/60 p-4 transition-colors hover:border-signal-mint/60 hover:bg-ink-100">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="font-mono text-[10px] uppercase tracking-wider text-ink-400">{{ str_pad($i + 1, 3, '0', STR_PAD_LEFT) }}</div>
+                            <div class="mt-1 font-serif text-base text-ink-900">{{ $sample['protein_name'] ?? $sample['protein_id'] }}</div>
+                            <div class="mt-1 font-serif text-xs italic text-ink-600">{{ $sample['organism'] ?? '—' }}</div>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            <div class="font-mono text-xs tabular-nums text-ink-800">{{ $sample['length'] ?? '?' }} <span class="text-ink-400">aa</span></div>
+                            @if(!empty($sample['category']))
+                                <div class="mt-2"><x-category-badge :category="$sample['category']" /></div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="mt-3 border-t border-dashed border-ink-300 pt-3 font-mono text-[10px] uppercase tracking-wider text-signal-mint">
+                        predecir →
+                    </div>
+                </a>
+            @endforeach
+        </div>
+
+        {{-- Vista en tabla · tablet+ --}}
+        <div class="panel hidden overflow-x-auto md:block">
             <table class="w-full font-mono text-xs">
                 <thead class="border-b border-ink-300 bg-ink-150/80 text-[10px] uppercase tracking-[0.14em] text-ink-500">
                     <tr>
@@ -227,23 +253,29 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="mt-6 md:hidden">
+            <a href="{{ route('proteins.index') }}" class="btn-secondary w-full justify-center">
+                catálogo completo →
+            </a>
+        </div>
     </div>
 </section>
 @endif
 
 {{-- ───────────────────────── GLOSARIO ───────────────────────── --}}
 <section>
-    <div class="mx-auto grid max-w-[1400px] gap-10 px-4 py-16 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
+    <div class="mx-auto grid max-w-[1400px] gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div class="lg:col-span-3">
             <div class="label-tag">apéndice a · glosario</div>
-            <h2 class="mt-3 font-serif text-3xl text-ink-900">Notas al margen</h2>
+            <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Notas al margen</h2>
             <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
                 Definiciones rápidas para quien no es bioinformático. Citadas en el
                 panel de resultados donde aparecen los términos por primera vez.
             </p>
         </div>
 
-        <dl class="lg:col-span-9 grid gap-px bg-ink-300 sm:grid-cols-3">
+        <dl class="grid gap-px bg-ink-300 sm:grid-cols-3 lg:col-span-9">
             <div class="bg-ink-100 p-6">
                 <dt class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">
                     <sup class="mr-1">[1]</sup> fasta

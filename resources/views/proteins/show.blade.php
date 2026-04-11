@@ -3,7 +3,7 @@
 @section('title', $protein['protein_name'] ?? 'Detalle de proteína')
 
 @section('content')
-<div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
 
     {{-- Migas --}}
     <a href="{{ route('proteins.index') }}" class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 hover:text-signal-mint">
@@ -11,15 +11,15 @@
     </a>
 
     {{-- Cabecera --}}
-    <header class="mt-4 border-b border-ink-300 pb-8">
+    <header class="mt-4 border-b border-ink-300 pb-6 sm:pb-8">
         <div class="label-tag">entrada · {{ str_pad((string)($protein['protein_id'] ?? '0'), 4, '0', STR_PAD_LEFT) }}</div>
 
-        <div class="mt-3 grid items-end gap-6 lg:grid-cols-12">
+        <div class="mt-3 grid items-end gap-5 lg:grid-cols-12 lg:gap-6">
             <div class="lg:col-span-9">
-                <h1 class="font-serif text-4xl text-ink-900 leading-tight">
+                <h1 class="font-serif text-3xl leading-tight text-ink-900 sm:text-4xl">
                     {{ $protein['protein_name'] }}
                 </h1>
-                <p class="mt-2 font-serif text-lg italic text-ink-600">
+                <p class="mt-2 font-serif text-base italic text-ink-600 sm:text-lg">
                     {{ $protein['organism'] ?? 'Organismo desconocido' }}
                 </p>
                 @if(!empty($protein['category']))
@@ -28,7 +28,7 @@
             </div>
             <div class="lg:col-span-3 lg:text-right">
                 <a href="{{ route('jobs.create', ['fasta' => $protein['fasta_ready'] ?? '', 'filename' => ($protein['protein_id'] ?? 'protein') . '.fasta']) }}"
-                   class="btn-primary justify-center w-full lg:w-auto">
+                   class="btn-primary w-full justify-center lg:w-auto">
                     → predecir estructura
                 </a>
             </div>
@@ -36,10 +36,10 @@
     </header>
 
     {{-- Ficha técnica a dos columnas --}}
-    <div class="mt-10 grid gap-8 lg:grid-cols-12">
+    <div class="mt-8 grid gap-6 sm:mt-10 sm:gap-8 lg:grid-cols-12">
 
         {{-- Izquierda: prosa --}}
-        <article class="lg:col-span-7 space-y-8">
+        <article class="space-y-6 sm:space-y-8 lg:col-span-7">
             @if(!empty($protein['description']))
                 <section>
                     <div class="label-tag mb-3">§ 1 · descripción</div>
@@ -70,20 +70,20 @@
             {{-- Visor FASTA --}}
             @if(!empty($protein['fasta_ready']))
                 <section>
-                    <div class="mb-3 flex items-center justify-between">
+                    <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <div class="label-tag">§ 4 · carga fasta</div>
-                        <button onclick="copyFasta()" id="copy-btn" class="btn-secondary !py-1.5 !px-3 !text-[10px]">
+                        <button onclick="copyFasta()" id="copy-btn" class="btn-secondary !px-3 !py-1.5 !text-[10px]">
                             copiar
                         </button>
                     </div>
-                    <pre id="fasta-content" class="max-h-72 overflow-auto border border-ink-300 bg-ink-100 p-4 font-mono text-[11px] leading-relaxed text-signal-mint-deep">{{ $protein['fasta_ready'] }}</pre>
+                    <pre id="fasta-content" class="max-h-64 overflow-auto border border-ink-300 bg-ink-100 p-3 font-mono text-[10px] leading-relaxed text-signal-mint-deep sm:max-h-72 sm:p-4 sm:text-[11px]" style="white-space: pre-wrap; word-break: break-all;">{{ $protein['fasta_ready'] }}</pre>
                 </section>
             @endif
         </article>
 
         {{-- Derecha: ficha técnica --}}
         <aside class="lg:col-span-5">
-            <div class="panel crosshair p-6">
+            <div class="panel crosshair p-5 sm:p-6">
                 <div class="mb-4 flex items-center justify-between">
                     <span class="label-tag">ficha técnica</span>
                     <span class="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">v1</span>

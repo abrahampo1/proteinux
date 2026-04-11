@@ -3,25 +3,25 @@
 @section('title', 'Trabajo ' . $jobId)
 
 @section('content')
-<div class="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 
     {{-- Cabecera del trabajo --}}
-    <div class="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-ink-300 pb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500">
-        <div class="flex items-center gap-3">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-ink-300 pb-4 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500 sm:mb-8 sm:text-[11px]">
+        <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
             <span class="text-ink-400">trabajo</span>
-            <span class="text-ink-900">{{ $jobId }}</span>
-            <span class="text-ink-400">|</span>
-            <span>pipeline <span class="text-ink-800">af2-proteinux/2.3.1</span></span>
+            <span class="truncate text-ink-900">{{ $jobId }}</span>
+            <span class="hidden text-ink-400 sm:inline">|</span>
+            <span class="hidden sm:inline">pipeline <span class="text-ink-800">af2-proteinux/2.3.1</span></span>
         </div>
         <a href="{{ route('jobs.create') }}" class="text-signal-mint hover:underline">→ nuevo envío</a>
     </div>
 
     {{-- ─────────── PENDIENTE / EN EJECUCIÓN ─────────── --}}
     <div id="progress-section" class="{{ $outputs ? 'hidden' : '' }}">
-        <div class="mx-auto max-w-2xl py-12">
+        <div class="mx-auto max-w-2xl py-8 sm:py-12">
             <div class="label-tag mb-4">en vivo · clúster ft3</div>
 
-            <h1 class="font-serif text-4xl text-ink-900" id="progress-title">Procesando tu secuencia…</h1>
+            <h1 class="font-serif text-3xl text-ink-900 sm:text-4xl" id="progress-title">Procesando tu secuencia…</h1>
             <p class="mt-3 max-w-xl font-serif text-base leading-relaxed text-ink-600" id="progress-subtitle">
                 Tu trabajo se está preparando para el supercomputador CESGA Finis Terrae&nbsp;III.
             </p>
@@ -32,29 +32,29 @@
 
             {{-- Trazado del pipeline --}}
             <ol class="mt-8 border border-ink-300 bg-ink-100/60" id="progress-steps">
-                <li class="flex items-center justify-between gap-4 border-b border-ink-300 px-5 py-4 transition-colors" data-step="PENDING">
-                    <div class="flex items-center gap-4">
+                <li class="flex items-center justify-between gap-3 border-b border-ink-300 px-4 py-4 transition-colors sm:gap-4 sm:px-5" data-step="PENDING">
+                    <div class="flex min-w-0 items-center gap-3 sm:gap-4">
                         <span class="font-mono text-[10px] uppercase tracking-wider text-signal-mint">§ 01</span>
-                        <div class="h-2 w-2 rounded-full bg-amber-500 animate-pulse" id="step-pending-dot"></div>
-                        <span class="font-mono text-xs uppercase tracking-wider text-ink-800">en cola · esperando gpu</span>
+                        <div class="h-2 w-2 shrink-0 animate-pulse rounded-full bg-amber-500" id="step-pending-dot"></div>
+                        <span class="truncate font-mono text-[11px] uppercase tracking-wider text-ink-800 sm:text-xs">en cola · esperando gpu</span>
                     </div>
-                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">etapa 01/03</span>
+                    <span class="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-400">01/03</span>
                 </li>
-                <li class="flex items-center justify-between gap-4 border-b border-ink-300 px-5 py-4 opacity-40 transition-opacity" data-step="RUNNING">
-                    <div class="flex items-center gap-4">
+                <li class="flex items-center justify-between gap-3 border-b border-ink-300 px-4 py-4 opacity-40 transition-opacity sm:gap-4 sm:px-5" data-step="RUNNING">
+                    <div class="flex min-w-0 items-center gap-3 sm:gap-4">
                         <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">§ 02</span>
-                        <div class="h-2 w-2 rounded-full bg-ink-400" id="step-running-dot"></div>
-                        <span class="font-mono text-xs uppercase tracking-wider text-ink-600">ejecutando inferencia alphafold2</span>
+                        <div class="h-2 w-2 shrink-0 rounded-full bg-ink-400" id="step-running-dot"></div>
+                        <span class="truncate font-mono text-[11px] uppercase tracking-wider text-ink-600 sm:text-xs">ejecutando alphafold2</span>
                     </div>
-                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">etapa 02/03</span>
+                    <span class="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-400">02/03</span>
                 </li>
-                <li class="flex items-center justify-between gap-4 px-5 py-4 opacity-40 transition-opacity" data-step="POSTPROCESS">
-                    <div class="flex items-center gap-4">
+                <li class="flex items-center justify-between gap-3 px-4 py-4 opacity-40 transition-opacity sm:gap-4 sm:px-5" data-step="POSTPROCESS">
+                    <div class="flex min-w-0 items-center gap-3 sm:gap-4">
                         <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">§ 03</span>
-                        <div class="h-2 w-2 rounded-full bg-ink-400" id="step-post-dot"></div>
-                        <span class="font-mono text-xs uppercase tracking-wider text-ink-600">generando ficheros de estructura</span>
+                        <div class="h-2 w-2 shrink-0 rounded-full bg-ink-400" id="step-post-dot"></div>
+                        <span class="truncate font-mono text-[11px] uppercase tracking-wider text-ink-600 sm:text-xs">generando ficheros</span>
                     </div>
-                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">etapa 03/03</span>
+                    <span class="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-400">03/03</span>
                 </li>
             </ol>
 
@@ -72,17 +72,17 @@
     <div id="results-section" class="{{ $outputs ? '' : 'hidden' }}">
 
         {{-- Bloque de título del resultado --}}
-        <header class="mb-8 grid items-end gap-4 border-b border-ink-300 pb-6 lg:grid-cols-12">
+        <header class="mb-6 grid items-end gap-4 border-b border-ink-300 pb-5 sm:mb-8 sm:pb-6 lg:grid-cols-12">
             <div class="lg:col-span-9">
                 <div class="label-tag">resultado · predicción de estructura</div>
-                <h1 class="mt-3 font-serif text-4xl text-ink-900" id="result-title">
+                <h1 class="mt-3 font-serif text-2xl leading-tight text-ink-900 sm:text-3xl lg:text-4xl" id="result-title">
                     @if($outputs && ($outputs['protein_metadata'] ?? null))
                         {{ $outputs['protein_metadata']['protein_name'] }}
                     @else
                         Resultado de predicción
                     @endif
                 </h1>
-                <p class="mt-2 font-serif text-base text-ink-600" id="result-subtitle">
+                <p class="mt-2 font-serif text-sm text-ink-600 sm:text-base" id="result-subtitle">
                     @if($outputs && ($outputs['protein_metadata'] ?? null))
                         <span class="italic">{{ $outputs['protein_metadata']['organism'] ?? '' }}</span>
                         @if($outputs['protein_metadata']['uniprot_id'] ?? null)
@@ -104,67 +104,67 @@
         </header>
 
         {{-- Cuadrícula principal --}}
-        <div class="grid gap-6 lg:grid-cols-12">
+        <div class="grid gap-5 sm:gap-6 lg:grid-cols-12">
 
             {{-- Visor 3D + gráficas --}}
-            <div class="lg:col-span-8 space-y-6">
+            <div class="space-y-5 sm:space-y-6 lg:col-span-8">
 
                 {{-- Visor 3D --}}
                 <figure class="panel">
-                    <figcaption class="flex items-center justify-between border-b border-ink-300 px-5 py-3">
+                    <figcaption class="flex flex-col gap-2 border-b border-ink-300 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <span class="label-tag">fig. 1 · estructura 3d</span>
                         <div class="flex flex-wrap items-center gap-1" id="viewer-controls">
                             <button onclick="setViewerStyle('cartoon')" id="btn-cartoon"
-                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider bg-signal-mint/15 text-signal-mint-deep border border-signal-mint/40">cartoon</button>
+                                    class="border border-signal-mint/40 bg-signal-mint/15 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-signal-mint-deep">cartoon</button>
                             <button onclick="setViewerStyle('stick')" id="btn-stick"
-                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">varilla</button>
+                                    class="border border-transparent px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 hover:border-ink-400 hover:text-ink-800">varilla</button>
                             <button onclick="setViewerStyle('sphere')" id="btn-sphere"
-                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">esfera</button>
+                                    class="border border-transparent px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 hover:border-ink-400 hover:text-ink-800">esfera</button>
                             <button onclick="setViewerStyle('surface')" id="btn-surface"
-                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">superficie</button>
-                            <span class="mx-1 text-ink-300">|</span>
+                                    class="border border-transparent px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 hover:border-ink-400 hover:text-ink-800">superficie</button>
+                            <span class="mx-1 hidden text-ink-300 sm:inline">|</span>
                             <button onclick="toggleSpin()" id="btn-spin"
-                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">girar</button>
+                                    class="border border-transparent px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 hover:border-ink-400 hover:text-ink-800">girar</button>
                             <button onclick="resetViewer()"
-                                    class="px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 border border-transparent hover:border-ink-400 hover:text-ink-800">reset</button>
+                                    class="border border-transparent px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-ink-500 hover:border-ink-400 hover:text-ink-800">reset</button>
                         </div>
                     </figcaption>
-                    <div id="viewer-container" style="position:relative;width:100%;height:520px;background:#ffffff"></div>
-                    <div class="flex items-center justify-between gap-4 border-t border-ink-300 px-5 py-2 font-mono text-[10px] uppercase tracking-wider text-ink-500">
-                        <span id="viewer-source">procedencia · cargando…</span>
-                        <span id="viewer-hover" class="text-ink-700 tabular-nums">&nbsp;</span>
+                    <div id="viewer-container" class="relative h-[320px] w-full bg-white sm:h-[440px] lg:h-[520px]"></div>
+                    <div class="flex flex-col gap-1 border-t border-ink-300 px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-ink-500 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5">
+                        <span id="viewer-source" class="truncate">procedencia · cargando…</span>
+                        <span id="viewer-hover" class="tabular-nums text-ink-700">&nbsp;</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 border-t border-ink-300 px-5 py-3 font-mono text-[10px] uppercase tracking-wider text-ink-500 sm:grid-cols-4">
-                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#0053D6"></span>muy alta &gt;90</span>
-                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#65CBF3"></span>alta 70–90</span>
-                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#FFDB13"></span>media 50–70</span>
-                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5" style="background:#FF7D45"></span>baja &lt;50</span>
+                    <div class="grid grid-cols-2 gap-2 border-t border-ink-300 px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-ink-500 sm:grid-cols-4 sm:gap-4 sm:px-5">
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 shrink-0" style="background:#0053D6"></span>muy alta &gt;90</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 shrink-0" style="background:#65CBF3"></span>alta 70–90</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 shrink-0" style="background:#FFDB13"></span>media 50–70</span>
+                        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 shrink-0" style="background:#FF7D45"></span>baja &lt;50</span>
                     </div>
                 </figure>
 
                 {{-- Gráfica pLDDT --}}
-                <figure class="panel p-5">
-                    <figcaption class="mb-3 flex items-center justify-between">
+                <figure class="panel p-4 sm:p-5">
+                    <figcaption class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <span class="label-tag">fig. 2 · pLDDT por residuo <sup class="text-signal-mint">[2]</sup></span>
-                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">x · índice del residuo · y · puntuación</span>
+                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">x · residuo · y · puntuación</span>
                     </figcaption>
                     <canvas id="plddt-chart" class="w-full" height="120"></canvas>
                 </figure>
 
                 {{-- Mapa PAE --}}
-                <figure class="panel p-5">
-                    <figcaption class="mb-3 flex items-center justify-between">
+                <figure class="panel p-4 sm:p-5">
+                    <figcaption class="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <span class="label-tag">fig. 3 · error alineado predicho</span>
                         <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">unidad · ångström</span>
                     </figcaption>
-                    <div class="flex items-start gap-5">
-                        <div class="relative flex-1">
+                    <div class="flex items-start gap-3 sm:gap-5">
+                        <div class="relative flex-1 overflow-hidden">
                             <canvas id="pae-heatmap" class="w-full"></canvas>
                             <div id="pae-tooltip" class="pointer-events-none absolute hidden border border-ink-400 bg-ink-50 px-2 py-1 font-mono text-[10px] text-ink-900 shadow-lg"></div>
                         </div>
-                        <div class="flex flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                        <div class="flex shrink-0 flex-col items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-ink-400">
                             <span>0 Å</span>
-                            <div class="h-32 w-3 border border-ink-300" style="background: linear-gradient(to bottom, #0d4a3e, #14b8a6, #fbbf24, #ffffff)"></div>
+                            <div class="h-24 w-3 border border-ink-300 sm:h-32" style="background: linear-gradient(to bottom, #0d4a3e, #14b8a6, #fbbf24, #ffffff)"></div>
                             <span id="pae-max-label">30 Å</span>
                         </div>
                     </div>
@@ -172,10 +172,10 @@
             </div>
 
             {{-- Barra lateral --}}
-            <aside class="lg:col-span-4 space-y-6">
+            <aside class="space-y-5 sm:space-y-6 lg:col-span-4">
 
                 {{-- Resumen de confianza --}}
-                <section class="panel p-5">
+                <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">tab. 1 · resumen de confianza</div>
                     <dl class="space-y-0" id="confidence-summary">
                         <div class="field">
@@ -191,7 +191,7 @@
                 </section>
 
                 {{-- Datos biológicos --}}
-                <section class="panel p-5">
+                <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">tab. 2 · propiedades biológicas</div>
                     <div class="space-y-2" id="bio-data">
                         <p class="font-mono text-xs text-ink-400">cargando…</p>
@@ -199,14 +199,14 @@
                 </section>
 
                 {{-- Estructura secundaria --}}
-                <section class="panel p-5">
+                <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">fig. 4 · estructura secundaria</div>
-                    <canvas id="secondary-structure-chart" class="mx-auto" width="160" height="160"></canvas>
-                    <div class="mt-3 flex justify-center gap-4 font-mono text-[10px] uppercase tracking-wider text-ink-600" id="ss-legend"></div>
+                    <canvas id="secondary-structure-chart" class="mx-auto max-w-full" width="160" height="160"></canvas>
+                    <div class="mt-3 flex flex-wrap justify-center gap-3 font-mono text-[10px] uppercase tracking-wider text-ink-600 sm:gap-4" id="ss-legend"></div>
                 </section>
 
                 {{-- Facturación HPC --}}
-                <section class="panel p-5">
+                <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">tab. 3 · recursos hpc</div>
                     <div class="space-y-2" id="accounting-data">
                         <p class="font-mono text-xs text-ink-400">cargando…</p>
@@ -214,21 +214,21 @@
                 </section>
 
                 {{-- Descargas --}}
-                <section class="panel p-5">
+                <section class="panel p-4 sm:p-5">
                     <div class="label-tag mb-4">descargas</div>
                     <div class="space-y-2" id="downloads">
-                        <button onclick="downloadFile('pdb')" class="flex w-full items-center justify-between border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
-                            <span>↓ structure.pdb</span>
-                            <span class="text-ink-400">protein data bank</span>
+                        <button onclick="downloadFile('pdb')" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                            <span class="truncate">↓ structure.pdb</span>
+                            <span class="shrink-0 text-ink-400">pdb</span>
                         </button>
-                        <button onclick="downloadFile('cif')" class="flex w-full items-center justify-between border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
-                            <span>↓ structure.cif</span>
-                            <span class="text-ink-400">mmcif</span>
+                        <button onclick="downloadFile('cif')" class="flex w-full items-center justify-between gap-2 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                            <span class="truncate">↓ structure.cif</span>
+                            <span class="shrink-0 text-ink-400">mmcif</span>
                         </button>
                     </div>
                 </section>
 
-                <a href="{{ route('jobs.create') }}" class="block btn-secondary justify-center text-center">
+                <a href="{{ route('jobs.create') }}" class="btn-secondary block w-full justify-center text-center">
                     + nuevo envío
                 </a>
             </aside>
@@ -237,11 +237,11 @@
 
     {{-- ─────────── FALLIDO ─────────── --}}
     <div id="error-section" class="hidden">
-        <div class="mx-auto max-w-lg py-16">
+        <div class="mx-auto max-w-lg py-12 sm:py-16">
             <div class="label-tag mb-4">! predicción fallida</div>
-            <h2 class="font-serif text-3xl text-ink-900">El pipeline no pudo completarse</h2>
+            <h2 class="font-serif text-2xl text-ink-900 sm:text-3xl">El pipeline no pudo completarse</h2>
             <p class="mt-3 font-serif text-ink-600" id="error-message">Ocurrió un error durante la predicción.</p>
-            <a href="{{ route('jobs.create') }}" class="mt-6 inline-flex btn-primary">
+            <a href="{{ route('jobs.create') }}" class="btn-primary mt-6 inline-flex">
                 ↻ reintentar
             </a>
         </div>
@@ -486,8 +486,12 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
     }
 
     if (container.clientWidth === 0 || container.clientHeight === 0) {
+        // Fallback sólo si las clases responsive no han asignado alto (muy
+        // improbable). Usamos un alto proporcional a la anchura disponible
+        // con techo razonable para móvil.
+        const fallback = Math.max(320, Math.min(520, Math.floor(container.clientWidth * 0.75)));
         container.style.width = '100%';
-        container.style.height = '520px';
+        container.style.height = fallback + 'px';
     }
 
     container.innerHTML = '';
@@ -570,12 +574,23 @@ async function init3DViewer(pdbString, plddtArray, metadata) {
     });
 }
 
-// Re-render del visor en cambios de tamaño de ventana
+// Re-render del visor y gráficas en cambios de tamaño de ventana.
+// Debounce para evitar redibujo en cada píxel mientras se arrastra el
+// borde de la ventana o se rota el dispositivo móvil.
+let _resizeTimer = null;
 window.addEventListener('resize', () => {
     if (viewer) {
         viewer.resize();
         viewer.render();
     }
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+        if (currentOutputs && currentOutputs.structural_data && currentOutputs.structural_data.confidence) {
+            const c = currentOutputs.structural_data.confidence;
+            if (c.plddt_per_residue) drawPlddtChart(c.plddt_per_residue);
+            if (c.pae_matrix) drawPaeHeatmap(c.pae_matrix);
+        }
+    }, 150);
 });
 
 let currentStyle = 'cartoon';
@@ -758,7 +773,11 @@ function drawPaeHeatmap(matrix) {
     const canvas = document.getElementById('pae-heatmap');
     const tooltip = document.getElementById('pae-tooltip');
     const n = matrix.length;
-    const size = Math.min(420, canvas.parentElement.clientWidth - 60);
+    // El parent flex-1 ya excluye la leyenda de gradiente (shrink-0) por lo
+    // que no hace falta restar su anchura. Dejamos un pequeño margen para
+    // que el canvas no pegue a la derecha.
+    const available = Math.max(0, canvas.parentElement.clientWidth - 4);
+    const size = Math.max(160, Math.min(420, available));
     canvas.width = size;
     canvas.height = size;
     canvas.style.width = size + 'px';

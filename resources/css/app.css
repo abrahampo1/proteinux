@@ -97,13 +97,13 @@
 
     /* Field row */
     .field {
-        @apply flex items-baseline justify-between gap-4 border-b border-dashed border-ink-300 py-2 last:border-b-0;
+        @apply flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-dashed border-ink-300 py-2 last:border-b-0;
     }
     .field dt {
         @apply font-mono text-[11px] uppercase tracking-wider text-ink-500;
     }
     .field dd {
-        @apply font-mono text-sm text-ink-900;
+        @apply break-words text-right font-mono text-sm text-ink-900;
     }
 
     /* Crosshair corner ornaments */
@@ -139,10 +139,10 @@
 
     /* Buttons */
     .btn-primary {
-        @apply inline-flex items-center gap-2 border border-signal-mint bg-signal-mint/10 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-signal-mint-deep transition-all hover:bg-signal-mint/20 hover:shadow-[0_0_0_1px_var(--color-signal-mint)];
+        @apply inline-flex items-center gap-2 border border-signal-mint bg-signal-mint/10 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-signal-mint-deep transition-all hover:bg-signal-mint/20 hover:shadow-[0_0_0_1px_var(--color-signal-mint)] sm:px-5 sm:text-xs;
     }
     .btn-secondary {
-        @apply inline-flex items-center gap-2 border border-ink-400 bg-ink-50 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-ink-700 transition-colors hover:border-ink-700 hover:text-ink-900;
+        @apply inline-flex items-center gap-2 border border-ink-400 bg-ink-50 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-700 transition-colors hover:border-ink-700 hover:text-ink-900 sm:px-5 sm:text-xs;
     }
 
     .status-dot {

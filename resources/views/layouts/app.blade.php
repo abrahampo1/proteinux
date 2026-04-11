@@ -7,6 +7,10 @@
     <meta name="ai-configured" content="{{ app(\App\Support\Ai\AiSettings::class)->isConfigured() ? 'true' : 'false' }}">
     <title>@yield('title', 'Proteinux') · Predicción de estructuras proteicas</title>
 
+    <link rel="icon" type="image/svg+xml" href="{{ asset('logo/LogoMol.svg') }}">
+    <link rel="mask-icon" href="{{ asset('logo/LogoMol.svg') }}" color="#0d9488">
+    <link rel="apple-touch-icon" href="{{ asset('logo/LogoMol.svg') }}">
+
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=ibm-plex-sans:400,500,600,700|ibm-plex-mono:400,500,600|ibm-plex-serif:400,500,600&display=swap" rel="stylesheet" />
 

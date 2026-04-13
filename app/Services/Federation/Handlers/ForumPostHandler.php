@@ -10,29 +10,39 @@ use App\Models\Forum\ForumThread;
 class ForumPostHandler
 {
     /**
-     * Handle an inbound federated forum post activity.
-     *
-     * @param  array{author: array{username: string, domain: string, display_name?: string}, body: string, origin_id: string, origin_domain: string, thread_origin_id: string, thread_origin_domain: string, parent_origin_id?: string}  $payload
+     * @param  array<string, mixed>  $payload
      */
     public function handle(array $payload): void
     {
-        $authorData = $payload['author'];
+        $data = $payload['data'] ?? $payload;
+        $originDomain = $payload['source_domain'] ?? ($data['origin_domain'] ?? null);
+        $originId = $data['origin_id'] ?? null;
+        $authorData = $data['author'] ?? [];
 
-        $instance = FederationInstance::where('domain', $authorData['domain'])->first();
+        if (! $originDomain || ! $originId) {
+            return;
+        }
+
+        // Deduplicate
+        if (ForumPost::where('origin_domain', $originDomain)->where('origin_id', $originId)->exists()) {
+            return;
+        }
+
+        $instance = FederationInstance::where('domain', $authorData['domain'] ?? $originDomain)->first();
 
         $remoteUser = RemoteUser::firstOrCreate(
             [
-                'username' => $authorData['username'],
-                'domain' => $authorData['domain'],
+                'username' => $authorData['username'] ?? 'unknown',
+                'domain' => $authorData['domain'] ?? $originDomain,
             ],
             [
-                'display_name' => $authorData['display_name'] ?? $authorData['username'],
+                'display_name' => $authorData['display_name'] ?? ($authorData['username'] ?? 'unknown'),
                 'federation_instance_id' => $instance?->id,
             ],
         );
 
-        $thread = ForumThread::where('origin_domain', $payload['thread_origin_domain'])
-            ->where('origin_id', $payload['thread_origin_id'])
+        $thread = ForumThread::where('origin_domain', $data['thread_origin_domain'] ?? null)
+            ->where('origin_id', $data['thread_origin_id'] ?? null)
             ->first();
 
         if (! $thread) {
@@ -41,26 +51,22 @@ class ForumPostHandler
 
         $parentId = null;
 
-        if (! empty($payload['parent_origin_id'])) {
-            $parent = ForumPost::where('origin_id', $payload['parent_origin_id'])
-                ->where('origin_domain', $payload['origin_domain'])
+        if (! empty($data['parent_origin_id'])) {
+            $parent = ForumPost::where('origin_id', $data['parent_origin_id'])
+                ->where('origin_domain', $originDomain)
                 ->first();
 
             $parentId = $parent?->id;
         }
 
-        ForumPost::firstOrCreate(
-            [
-                'origin_domain' => $payload['origin_domain'],
-                'origin_id' => $payload['origin_id'],
-            ],
-            [
-                'forum_thread_id' => $thread->id,
-                'body' => $payload['body'],
-                'remote_user_id' => $remoteUser->id,
-                'parent_id' => $parentId,
-            ],
-        );
+        ForumPost::create([
+            'forum_thread_id' => $thread->id,
+            'body' => $data['body'] ?? '',
+            'remote_user_id' => $remoteUser->id,
+            'parent_id' => $parentId,
+            'origin_domain' => $originDomain,
+            'origin_id' => $originId,
+        ]);
 
         $thread->increment('posts_count');
         $thread->update(['last_activity_at' => now()]);

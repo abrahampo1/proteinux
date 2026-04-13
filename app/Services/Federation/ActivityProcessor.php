@@ -40,7 +40,7 @@ class ActivityProcessor
 
         try {
             $handler = app($this->handlers[$type]);
-            $handler->handle($activity);
+            $handler->handle($activity->payload);
             $activity->markAsProcessed();
         } catch (\Throwable $e) {
             Log::error("Federation activity processing failed: {$e->getMessage()}", [

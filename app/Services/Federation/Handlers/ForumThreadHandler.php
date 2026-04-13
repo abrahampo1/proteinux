@@ -10,50 +10,56 @@ use App\Models\PredictedJob;
 class ForumThreadHandler
 {
     /**
-     * Handle an inbound federated forum thread activity.
-     *
-     * @param  array{author: array{username: string, domain: string, display_name?: string}, title: string, body: string, origin_id: string, origin_domain: string, protein_reference?: string}  $payload
+     * @param  array<string, mixed>  $payload
      */
     public function handle(array $payload): void
     {
-        $authorData = $payload['author'];
+        $data = $payload['data'] ?? $payload;
+        $originDomain = $payload['source_domain'] ?? ($data['origin_domain'] ?? null);
+        $originId = $data['origin_id'] ?? null;
+        $authorData = $data['author'] ?? [];
 
-        $instance = FederationInstance::where('domain', $authorData['domain'])->first();
+        if (! $originDomain || ! $originId) {
+            return;
+        }
+
+        // Deduplicate
+        if (ForumThread::where('origin_domain', $originDomain)->where('origin_id', $originId)->exists()) {
+            return;
+        }
+
+        $instance = FederationInstance::where('domain', $authorData['domain'] ?? $originDomain)->first();
 
         $remoteUser = RemoteUser::firstOrCreate(
             [
-                'username' => $authorData['username'],
-                'domain' => $authorData['domain'],
+                'username' => $authorData['username'] ?? 'unknown',
+                'domain' => $authorData['domain'] ?? $originDomain,
             ],
             [
-                'display_name' => $authorData['display_name'] ?? $authorData['username'],
+                'display_name' => $authorData['display_name'] ?? ($authorData['username'] ?? 'unknown'),
                 'federation_instance_id' => $instance?->id,
             ],
         );
 
         $predictedJobId = null;
 
-        if (! empty($payload['protein_reference'])) {
-            $predictedJob = PredictedJob::where('protein_name', $payload['protein_reference'])
-                ->orWhere('uniprot_id', $payload['protein_reference'])
-                ->orWhere('pdb_id', $payload['protein_reference'])
+        if (! empty($data['protein_reference'])) {
+            $predictedJob = PredictedJob::where('protein_name', $data['protein_reference'])
+                ->orWhere('uniprot_id', $data['protein_reference'])
+                ->orWhere('pdb_id', $data['protein_reference'])
                 ->first();
 
             $predictedJobId = $predictedJob?->id;
         }
 
-        ForumThread::firstOrCreate(
-            [
-                'origin_domain' => $payload['origin_domain'],
-                'origin_id' => $payload['origin_id'],
-            ],
-            [
-                'title' => $payload['title'],
-                'body' => $payload['body'],
-                'remote_user_id' => $remoteUser->id,
-                'predicted_job_id' => $predictedJobId,
-                'protein_reference' => $payload['protein_reference'] ?? null,
-            ],
-        );
+        ForumThread::create([
+            'title' => $data['title'] ?? 'Sin titulo',
+            'body' => $data['body'] ?? '',
+            'remote_user_id' => $remoteUser->id,
+            'predicted_job_id' => $predictedJobId,
+            'protein_reference' => $data['protein_reference'] ?? null,
+            'origin_domain' => $originDomain,
+            'origin_id' => $originId,
+        ]);
     }
 }

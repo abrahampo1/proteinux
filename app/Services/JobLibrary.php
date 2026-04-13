@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PredictedJob;
+use App\Services\Federation\ActivityDispatcher;
 
 class JobLibrary
 {
@@ -74,6 +75,28 @@ class JobLibrary
         $row->save();
 
         return $row;
+    }
+
+    public function shareEntry(PredictedJob $job): void
+    {
+        $job->update(['is_shared' => true]);
+
+        if (config('services.federation.enabled')) {
+            app(ActivityDispatcher::class)->dispatch(
+                type: 'library_entry',
+                action: 'create',
+                payload: [
+                    'protein_name' => $job->protein_name,
+                    'organism' => $job->organism,
+                    'uniprot_id' => $job->uniprot_id,
+                    'pdb_id' => $job->pdb_id,
+                    'sequence_length' => $job->sequence_length,
+                    'plddt_mean' => $job->plddt_mean,
+                    'fasta_preview' => $job->fasta_preview,
+                    'origin_id' => (string) $job->id,
+                ],
+            );
+        }
     }
 
     public function deleteByJobId(string $jobId): void

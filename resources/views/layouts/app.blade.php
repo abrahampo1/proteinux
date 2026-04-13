@@ -75,14 +75,32 @@
                        class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('library.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / biblioteca
                     </a>
+                    <a href="{{ route('forum.index') }}"
+                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('forum.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                        / foro
+                    </a>
+                    <a href="{{ route('documents.index') }}"
+                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('documents.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                        / documentos
+                    </a>
                     <a href="{{ route('settings.ai') }}"
                        class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / ajustes ia
                     </a>
-                    <a href="{{ route('jobs.create') }}" class="ml-3 btn-primary">
-                        <span class="status-dot bg-signal-mint"></span>
-                        enviar trabajo
-                    </a>
+
+                    @auth
+                        <div class="ml-3 flex items-center gap-2">
+                            <span class="font-mono text-[10px] text-ink-600">{{ auth()->user()->federatedId() }}</span>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 transition-colors hover:text-red-600">salir</button>
+                            </form>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="ml-3 btn-primary">
+                            acceder
+                        </a>
+                    @endauth
                 </div>
 
                 {{-- Botón hamburguesa en móvil --}}
@@ -116,14 +134,32 @@
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('library.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / biblioteca
                     </a>
+                    <a href="{{ route('forum.index') }}"
+                       class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('forum.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
+                        / foro
+                    </a>
+                    <a href="{{ route('documents.index') }}"
+                       class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('documents.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
+                        / documentos
+                    </a>
                     <a href="{{ route('settings.ai') }}"
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / ajustes ia
                     </a>
-                    <a href="{{ route('jobs.create') }}" class="mt-2 btn-primary w-full justify-center">
-                        <span class="status-dot bg-signal-mint"></span>
-                        enviar trabajo
-                    </a>
+
+                    @auth
+                        <div class="mt-2 border-t border-ink-300 pt-3 px-3">
+                            <span class="font-mono text-[10px] text-ink-600">{{ auth()->user()->federatedId() }}</span>
+                            <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                                @csrf
+                                <button type="submit" class="btn-primary w-full justify-center bg-red-50 text-red-700 border-red-300 hover:bg-red-100">salir</button>
+                            </form>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}" class="mt-2 btn-primary w-full justify-center">
+                            acceder
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>

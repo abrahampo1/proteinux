@@ -35,6 +35,13 @@ return [
         ],
     ],
 
+    'federation' => [
+        'enabled' => env('FEDERATION_ENABLED', false),
+        'domain' => env('FEDERATION_DOMAIN', 'localhost'),
+        'instance_name' => env('FEDERATION_INSTANCE_NAME', 'Proteinux'),
+        'instance_description' => env('FEDERATION_INSTANCE_DESCRIPTION', ''),
+    ],
+
     'cesga' => [
         'base_url' => env('CESGA_API_URL', 'https://api-mock-cesga.onrender.com'),
         'timeout' => (int) env('CESGA_API_TIMEOUT', 45),

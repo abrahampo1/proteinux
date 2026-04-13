@@ -21,6 +21,7 @@ class StoreForumThreadRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:10000'],
             'predicted_job_id' => ['nullable', 'exists:predicted_jobs,id'],
+            'protein_reference' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

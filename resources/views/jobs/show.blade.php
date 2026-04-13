@@ -405,6 +405,55 @@
             </p>
         </section>
 
+        {{-- ─────────── DISCUSIONES ─────────── --}}
+        @if(isset($libraryEntry) && $libraryEntry)
+            <section class="mt-10 border-t border-ink-300 pt-6">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div class="label-tag">discusiones · {{ $threads->count() }} hilos</div>
+                    @auth
+                        <a href="{{ route('forum.create', ['predicted_job_id' => $libraryEntry->id, 'title' => 'Discusión: ' . $libraryEntry->displayName()]) }}"
+                           class="btn-primary !text-[10px]">
+                            + nuevo hilo
+                        </a>
+                    @endauth
+                </div>
+
+                @if($threads->isNotEmpty())
+                    <div class="space-y-2">
+                        @foreach($threads as $thread)
+                            <a href="{{ route('forum.show', $thread) }}"
+                               class="group flex items-center justify-between gap-3 border border-ink-300 bg-ink-100/60 p-3 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="truncate font-serif text-sm leading-tight text-ink-900 group-hover:text-signal-mint-deep">
+                                        {{ $thread->title }}
+                                    </h3>
+                                    <div class="mt-1 flex items-center gap-x-3">
+                                        <x-federated-author :author="$thread->author()" />
+                                        <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                            {{ $thread->created_at->format('Y-m-d') }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <span class="shrink-0 font-mono text-[11px] tabular-nums text-ink-700">
+                                    {{ $thread->posts_count }} <span class="text-ink-400">resp.</span>
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="border border-dashed border-ink-300 bg-ink-100/50 px-4 py-6 text-center">
+                        <p class="font-serif text-sm text-ink-600">
+                            Sin discusiones a&#250;n.
+                            @auth
+                                <a href="{{ route('forum.create', ['predicted_job_id' => $libraryEntry->id, 'title' => 'Discusión: ' . $libraryEntry->displayName()]) }}"
+                                   class="font-mono text-signal-mint hover:underline">iniciar una &rarr;</a>
+                            @endauth
+                        </p>
+                    </div>
+                @endif
+            </section>
+        @endif
+
         {{-- ─────────── PIE · RE-EJECUCIÓN ─────────── --}}
         @if(isset($libraryEntry) && $libraryEntry)
             <footer class="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-ink-300 pt-6">

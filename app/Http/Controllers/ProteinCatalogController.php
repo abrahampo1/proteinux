@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CesgaApiException;
+use App\Models\Forum\ForumThread;
 use App\Services\CesgaApiService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -38,6 +39,19 @@ class ProteinCatalogController extends Controller
             abort(404, 'Protein not found');
         }
 
-        return view('proteins.show', compact('protein'));
+        $proteinName = $protein['protein_name'] ?? '';
+
+        $threads = ForumThread::with(['user', 'remoteUser'])
+            ->where(function ($q) use ($proteinId, $proteinName) {
+                $q->where('protein_reference', $proteinId);
+                if ($proteinName !== '') {
+                    $q->orWhere('protein_reference', $proteinName);
+                }
+            })
+            ->orderByDesc('last_activity_at')
+            ->limit(10)
+            ->get();
+
+        return view('proteins.show', compact('protein', 'threads'));
     }
 }

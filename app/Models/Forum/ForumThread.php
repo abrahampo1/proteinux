@@ -5,6 +5,7 @@ namespace App\Models\Forum;
 use App\Models\PredictedJob;
 use App\Traits\HasFederatedAuthor;
 use Database\Factories\Forum\ForumThreadFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -74,6 +75,28 @@ class ForumThread extends Model
     public function isRemote(): bool
     {
         return $this->origin_domain !== null;
+    }
+
+    /**
+     * Scope threads linked to a specific predicted job.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeForPredictedJob($query, int $predictedJobId)
+    {
+        return $query->where('predicted_job_id', $predictedJobId);
+    }
+
+    /**
+     * Scope threads linked to a specific protein reference.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeForProteinReference($query, string $proteinReference)
+    {
+        return $query->where('protein_reference', $proteinReference);
     }
 
     protected static function booted(): void

@@ -141,6 +141,17 @@
                         </div>
                     </dl>
 
+                    {{-- Hilos del foro --}}
+                    @if($entry->forum_threads_count > 0)
+                        <div class="mt-3 border-t border-dashed border-ink-300 pt-3">
+                            <a href="{{ route('forum.index', ['protein' => $entry->id]) }}"
+                               class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-signal-mint-deep transition-colors hover:text-signal-mint">
+                                <span class="status-dot bg-signal-mint"></span>
+                                {{ $entry->forum_threads_count }} {{ $entry->forum_threads_count === 1 ? 'hilo' : 'hilos' }} en el foro
+                            </a>
+                        </div>
+                    @endif
+
                     <div class="mt-auto flex flex-wrap gap-2 pt-4">
                         @if(! $entry->isRemote())
                             <a href="{{ route('jobs.show', $entry->job_id) }}"

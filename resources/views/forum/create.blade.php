@@ -15,14 +15,27 @@
         </p>
     </header>
 
+    @if(!empty($prefilledReference))
+        <div class="mb-8 flex items-center gap-3 border border-signal-mint/40 bg-signal-mint/5 p-4">
+            <span class="status-dot bg-signal-mint"></span>
+            <p class="font-mono text-[11px] uppercase tracking-wider text-signal-mint-deep">
+                vinculado a prote&#237;na: <span class="text-ink-900">{{ $prefilledReference }}</span>
+            </p>
+        </div>
+    @endif
+
     <form action="{{ route('forum.store') }}" method="POST" class="space-y-8 sm:space-y-10">
         @csrf
+
+        @if(!empty($prefilledReference))
+            <input type="hidden" name="protein_reference" value="{{ $prefilledReference }}">
+        @endif
 
         {{-- T&#237;tulo --}}
         <fieldset>
             <legend class="label-tag mb-2">&sect; 1 &mdash; t&#237;tulo</legend>
             <input type="text" name="title" id="title"
-                   value="{{ old('title') }}"
+                   value="{{ old('title', $prefilledTitle ?? '') }}"
                    class="input-lab @error('title') !border-signal-rust @enderror"
                    placeholder="T&#237;tulo del hilo"
                    required>
@@ -48,7 +61,7 @@
             <select name="predicted_job_id" id="predicted_job_id" class="input-lab">
                 <option value="">&mdash; sin vincular a predicci&#243;n &mdash;</option>
                 @foreach($predictedJobs as $job)
-                    <option value="{{ $job->id }}" @selected(old('predicted_job_id') == $job->id)>
+                    <option value="{{ $job->id }}" @selected(old('predicted_job_id', $preselectedJobId ?? '') == $job->id)>
                         {{ $job->displayName() }} &middot; {{ $job->organism ?? 'sin organismo' }}
                     </option>
                 @endforeach

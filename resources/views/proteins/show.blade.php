@@ -139,6 +139,69 @@
             </div>
         </aside>
     </div>
+
+    {{-- Discusiones relacionadas --}}
+    <section class="mt-10 border-t border-ink-300 pt-8 sm:mt-12 sm:pt-10">
+        <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <div class="label-tag">discusiones</div>
+                <h2 class="mt-2 font-serif text-xl text-ink-900 sm:text-2xl">Hilos sobre esta prote&#237;na</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                @auth
+                    <a href="{{ route('forum.create', ['protein_reference' => $protein['protein_id'] ?? '', 'title' => 'Discusión: ' . ($protein['protein_name'] ?? '')]) }}"
+                       class="btn-primary !text-[10px]">
+                        + nuevo hilo
+                    </a>
+                @endauth
+                <a href="{{ route('forum.index', ['q' => $protein['protein_name'] ?? '']) }}"
+                   class="btn-secondary !text-[10px]">
+                    buscar en foro
+                </a>
+            </div>
+        </div>
+
+        @if($threads->isNotEmpty())
+            <div class="space-y-2">
+                @foreach($threads as $thread)
+                    <a href="{{ route('forum.show', $thread) }}"
+                       class="group flex items-center justify-between gap-3 border border-ink-300 bg-ink-100/60 p-3 transition-all hover:border-signal-mint/60 hover:bg-ink-100 sm:p-4">
+                        <div class="min-w-0 flex-1">
+                            <h3 class="truncate font-serif text-sm leading-tight text-ink-900 group-hover:text-signal-mint-deep sm:text-base">
+                                {{ $thread->title }}
+                            </h3>
+                            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <x-federated-author :author="$thread->author()" />
+                                <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                    {{ $thread->created_at->format('Y-m-d') }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex shrink-0 flex-col items-end gap-1">
+                            <span class="font-mono text-[11px] tabular-nums text-ink-700">
+                                {{ $thread->posts_count }} <span class="text-ink-400">resp.</span>
+                            </span>
+                            @if($thread->last_activity_at)
+                                <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                    {{ $thread->last_activity_at->diffForHumans() }}
+                                </span>
+                            @endif
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        @else
+            <div class="border border-dashed border-ink-300 bg-ink-100/50 px-6 py-10 text-center">
+                <p class="font-serif text-sm text-ink-600">
+                    A&#250;n no hay discusiones sobre esta prote&#237;na.
+                    @auth
+                        <a href="{{ route('forum.create', ['protein_reference' => $protein['protein_id'] ?? '', 'title' => 'Discusión: ' . ($protein['protein_name'] ?? '')]) }}"
+                           class="font-mono text-signal-mint hover:underline">iniciar la primera &rarr;</a>
+                    @endauth
+                </p>
+            </div>
+        @endif
+    </section>
 </div>
 @endsection
 

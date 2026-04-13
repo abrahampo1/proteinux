@@ -34,7 +34,7 @@ class ForumThreadController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $predictedJobs = PredictedJob::whereNotNull('completed_at')
             ->orderByDesc('completed_at')
@@ -42,6 +42,9 @@ class ForumThreadController extends Controller
 
         return view('forum.create', [
             'predictedJobs' => $predictedJobs,
+            'preselectedJobId' => $request->query('predicted_job_id'),
+            'prefilledReference' => $request->query('protein_reference'),
+            'prefilledTitle' => $request->query('title'),
         ]);
     }
 

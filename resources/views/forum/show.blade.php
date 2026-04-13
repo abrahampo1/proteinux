@@ -6,8 +6,10 @@
 <div class="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 
     {{-- Navegaci&#243;n --}}
-    <div class="mb-6 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 sm:mb-8">
-        <a href="{{ route('forum.index') }}" class="transition-colors hover:text-signal-mint">&larr; volver al foro</a>
+    <div class="mb-6 flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 sm:mb-8">
+        <a href="{{ route('forum.index') }}" class="transition-colors hover:text-signal-mint">/ foro</a>
+        <span class="text-ink-300">/</span>
+        <span class="truncate text-ink-700">{{ Str::limit($thread->title, 50) }}</span>
     </div>
 
     {{-- Cabecera del hilo --}}

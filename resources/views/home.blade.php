@@ -107,11 +107,137 @@
 </section>
 @endif
 
+{{-- ───────────────────────── ACCESO RÁPIDO ───────────────────────── --}}
+<section class="border-b border-ink-300">
+    <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div class="mb-8">
+            <div class="label-tag">sección 02 · acceso rápido</div>
+            <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Explora la plataforma</h2>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {{-- Enviar secuencia --}}
+            <a href="{{ route('jobs.create') }}"
+               class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">→ predicción</div>
+                <h3 class="font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Enviar secuencia</h3>
+                <p class="mt-2 font-serif text-sm leading-relaxed text-ink-600">
+                    Sube una secuencia FASTA y obtén la estructura 3D predicha por AlphaFold2.
+                </p>
+            </a>
+
+            {{-- Catálogo --}}
+            <a href="{{ route('proteins.index') }}"
+               class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">→ catálogo</div>
+                <h3 class="font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Proteínas curadas</h3>
+                <p class="mt-2 font-serif text-sm leading-relaxed text-ink-600">
+                    Conjunto de referencia con identificadores UniProt y PDB verificados.
+                </p>
+                @if($stats)
+                    <div class="mt-3 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+                        <span class="text-ink-800 tabular-nums">{{ $stats['total_proteins'] ?? '—' }}</span> entradas
+                    </div>
+                @endif
+            </a>
+
+            {{-- Biblioteca --}}
+            <a href="{{ route('library.index') }}"
+               class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">→ biblioteca</div>
+                <h3 class="font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Predicciones</h3>
+                <p class="mt-2 font-serif text-sm leading-relaxed text-ink-600">
+                    Historial compartido de todas las predicciones ejecutadas en la instancia.
+                </p>
+                <div class="mt-3 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+                    <span class="text-ink-800 tabular-nums">{{ $completedCount }}</span> completadas
+                    <span class="text-ink-400">·</span>
+                    <span class="text-ink-800 tabular-nums">{{ $libraryCount }}</span> total
+                </div>
+            </a>
+
+            {{-- Foro --}}
+            <a href="{{ route('forum.index') }}"
+               class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">→ foro</div>
+                <h3 class="font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Discusiones</h3>
+                <p class="mt-2 font-serif text-sm leading-relaxed text-ink-600">
+                    Debate sobre proteínas, predicciones y biología estructural con la comunidad.
+                </p>
+                <div class="mt-3 font-mono text-[10px] uppercase tracking-wider text-ink-500">
+                    <span class="text-ink-800 tabular-nums">{{ $threadCount }}</span> hilos
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+{{-- ───────────────────────── ACTIVIDAD RECIENTE DEL FORO ───────────────────────── --}}
+@if($recentThreads->isNotEmpty())
+<section class="border-b border-ink-300">
+    <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <div class="label-tag">sección 03 · comunidad</div>
+                <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Actividad reciente en el foro</h2>
+                <p class="mt-2 max-w-2xl font-serif text-sm text-ink-600">
+                    Últimas discusiones de la comunidad sobre proteínas y predicciones.
+                </p>
+            </div>
+            <a href="{{ route('forum.index') }}" class="btn-secondary">
+                ver todo el foro →
+            </a>
+        </div>
+
+        <div class="space-y-2">
+            @foreach($recentThreads as $thread)
+                <a href="{{ route('forum.show', $thread) }}"
+                   class="group flex items-center justify-between gap-4 border border-ink-300 bg-ink-100/60 p-4 transition-all hover:border-signal-mint/60 hover:bg-ink-100 sm:p-5">
+                    <div class="min-w-0 flex-1">
+                        <div class="mb-1 flex flex-wrap items-center gap-2">
+                            @if($thread->is_pinned)
+                                <span class="inline-flex items-center gap-1 border border-signal-amber/40 bg-signal-amber/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-amber">
+                                    fijado
+                                </span>
+                            @endif
+                            @if($thread->predictedJob)
+                                <span class="inline-flex items-center gap-1 border border-signal-mint/40 bg-signal-mint/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-mint-deep">
+                                    {{ $thread->predictedJob->displayName() }}
+                                </span>
+                            @endif
+                        </div>
+                        <h3 class="truncate font-serif text-base leading-tight text-ink-900 group-hover:text-signal-mint-deep sm:text-lg">
+                            {{ $thread->title }}
+                        </h3>
+                        <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <x-federated-author :author="$thread->author()" />
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                {{ $thread->created_at->format('Y-m-d') }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex shrink-0 flex-col items-end gap-1">
+                        <span class="font-mono text-[11px] tabular-nums text-ink-700">
+                            {{ $thread->posts_count }} <span class="text-ink-400">resp.</span>
+                        </span>
+                        @if($thread->last_activity_at)
+                            <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                {{ $thread->last_activity_at->diffForHumans() }}
+                            </span>
+                        @endif
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
 {{-- ───────────────────────── PROCEDIMIENTO ───────────────────────── --}}
 <section class="border-b border-ink-300">
     <div class="mx-auto grid max-w-[1400px] gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div class="lg:col-span-3">
-            <div class="label-tag">sección 02 · métodos</div>
+            <div class="label-tag">sección 04 · métodos</div>
             <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Procedimiento</h2>
             <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
                 Tres etapas deterministas, todas transparentes: los datos entran, la
@@ -123,7 +249,7 @@
             <ol class="divide-y divide-ink-300 border-y border-ink-300">
                 <li class="grid gap-6 py-6 md:grid-cols-12">
                     <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint md:col-span-2">
-                        § 2.1 — entrada
+                        § 4.1 — entrada
                     </div>
                     <div class="md:col-span-10">
                         <h3 class="font-serif text-lg text-ink-900">Recepción de la secuencia</h3>
@@ -137,7 +263,7 @@
 
                 <li class="grid gap-6 py-6 md:grid-cols-12">
                     <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint md:col-span-2">
-                        § 2.2 — inferencia
+                        § 4.2 — inferencia
                     </div>
                     <div class="md:col-span-10">
                         <h3 class="font-serif text-lg text-ink-900">AlphaFold2 sobre FT3</h3>
@@ -151,7 +277,7 @@
 
                 <li class="grid gap-6 py-6 md:grid-cols-12">
                     <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint md:col-span-2">
-                        § 2.3 — salida
+                        § 4.3 — salida
                     </div>
                     <div class="md:col-span-10">
                         <h3 class="font-serif text-lg text-ink-900">Estructura anotada</h3>
@@ -173,7 +299,7 @@
     <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         <div class="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
             <div>
-                <div class="label-tag">sección 03 · conjunto de referencia</div>
+                <div class="label-tag">sección 05 · conjunto de referencia</div>
                 <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Pruébalo con una proteína conocida</h2>
                 <p class="mt-2 max-w-xl font-serif text-sm text-ink-600">
                     Entradas curadas con referencias cruzadas verificadas a UniProt y PDB.
@@ -267,7 +393,7 @@
 <section>
     <div class="mx-auto grid max-w-[1400px] gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div class="lg:col-span-3">
-            <div class="label-tag">apéndice a · glosario</div>
+            <div class="label-tag">apéndice · glosario</div>
             <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Notas al margen</h2>
             <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
                 Definiciones rápidas para quien no es bioinformático. Citadas en el

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\CesgaApiException;
 use App\Http\Requests\JobSubmitRequest;
+use App\Models\Forum\ForumThread;
 use App\Services\CesgaApiService;
 use App\Services\JobLibrary;
 use Illuminate\Http\RedirectResponse;
@@ -93,6 +94,15 @@ class JobController extends Controller
 
         $libraryEntry = $library->findByJobId($jobId);
 
-        return view('jobs.show', compact('jobId', 'status', 'outputs', 'accounting', 'libraryEntry'));
+        $threads = collect();
+        if ($libraryEntry) {
+            $threads = ForumThread::with(['user', 'remoteUser'])
+                ->forPredictedJob($libraryEntry->id)
+                ->orderByDesc('last_activity_at')
+                ->limit(5)
+                ->get();
+        }
+
+        return view('jobs.show', compact('jobId', 'status', 'outputs', 'accounting', 'libraryEntry', 'threads'));
     }
 }

@@ -26,15 +26,25 @@ class ForumThreadController extends Controller
             $query->where('predicted_job_id', $proteinId);
         }
 
+        if ($proteinRef = $request->string('protein_ref')->toString()) {
+            $query->where('protein_reference', $proteinRef);
+        }
+
+        if ($jobId = $request->string('job')->toString()) {
+            $query->whereHas('predictedJob', fn ($q) => $q->where('job_id', $jobId));
+        }
+
         $threads = $query->paginate(20)->withQueryString();
 
         return view('forum.index', [
             'threads' => $threads,
             'search' => $search,
+            'proteinRef' => $proteinRef,
+            'jobFilter' => $jobId,
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $predictedJobs = PredictedJob::whereNotNull('completed_at')
             ->orderByDesc('completed_at')
@@ -42,6 +52,8 @@ class ForumThreadController extends Controller
 
         return view('forum.create', [
             'predictedJobs' => $predictedJobs,
+            'prefillProteinRef' => $request->query('protein_ref'),
+            'prefillJobId' => $request->query('predicted_job_id'),
         ]);
     }
 

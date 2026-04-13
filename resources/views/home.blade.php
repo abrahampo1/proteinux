@@ -263,6 +263,110 @@
 </section>
 @endif
 
+{{-- ───────────────────────── ACCESOS RÁPIDOS ───────────────────────── --}}
+<section class="border-b border-ink-300">
+    <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div class="mb-8 sm:mb-10">
+            <div class="label-tag">sección 04 · explorar</div>
+            <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Accesos rápidos</h2>
+            <p class="mt-2 max-w-xl font-serif text-sm text-ink-600">
+                Todo lo que la plataforma ofrece, a un clic.
+            </p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="{{ route('jobs.create') }}" class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">predicción</div>
+                <h3 class="mt-2 font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Enviar secuencia</h3>
+                <p class="mt-1 font-serif text-[13px] leading-relaxed text-ink-600">Predice la estructura 3D de cualquier proteína con AlphaFold2.</p>
+                <span class="mt-3 block font-mono text-[10px] uppercase tracking-wider text-signal-mint">→ nueva predicción</span>
+            </a>
+            <a href="{{ route('proteins.index') }}" class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">datos</div>
+                <h3 class="mt-2 font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Catálogo</h3>
+                <p class="mt-1 font-serif text-[13px] leading-relaxed text-ink-600">Conjunto curado de proteínas con referencias verificadas de UniProt y PDB.</p>
+                <span class="mt-3 block font-mono text-[10px] uppercase tracking-wider text-signal-mint">→ explorar catálogo</span>
+            </a>
+            <a href="{{ route('forum.index') }}" class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">comunidad</div>
+                <h3 class="mt-2 font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Foro</h3>
+                <p class="mt-1 font-serif text-[13px] leading-relaxed text-ink-600">Discusiones sobre proteínas, predicciones y biología estructural.</p>
+                <span class="mt-3 block font-mono text-[10px] uppercase tracking-wider text-signal-mint">→ entrar al foro</span>
+            </a>
+            <a href="{{ route('documents.index') }}" class="group border border-ink-300 bg-ink-100/60 p-5 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                <div class="font-mono text-[10px] uppercase tracking-[0.14em] text-signal-mint">investigación</div>
+                <h3 class="mt-2 font-serif text-lg text-ink-900 group-hover:text-signal-mint-deep">Documentos</h3>
+                <p class="mt-1 font-serif text-[13px] leading-relaxed text-ink-600">Repositorio de publicaciones, notas y protocolos científicos.</p>
+                <span class="mt-3 block font-mono text-[10px] uppercase tracking-wider text-signal-mint">→ ver documentos</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+{{-- ───────────────────────── COMUNIDAD / FORO ───────────────────────── --}}
+@if($latestThreads->isNotEmpty())
+<section class="border-b border-ink-300">
+    <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div class="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+            <div>
+                <div class="label-tag">sección 05 · comunidad</div>
+                <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Últimas discusiones</h2>
+                <p class="mt-2 max-w-xl font-serif text-sm text-ink-600">
+                    Conversaciones recientes en el foro. Únete a la discusión sobre
+                    predicciones, proteínas y biología estructural.
+                </p>
+            </div>
+            <a href="{{ route('forum.index') }}" class="btn-secondary hidden sm:inline-flex">
+                ver todo el foro →
+            </a>
+        </div>
+
+        <div class="space-y-3">
+            @foreach($latestThreads as $thread)
+                <a href="{{ route('forum.show', $thread) }}"
+                   class="group block border border-ink-300 bg-ink-100/60 p-4 transition-all hover:border-signal-mint/60 hover:bg-ink-100 sm:p-5">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="mb-1.5 flex flex-wrap items-center gap-2">
+                                @if($thread->is_pinned)
+                                    <span class="inline-flex items-center gap-1 border border-signal-amber/40 bg-signal-amber/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-amber">fijado</span>
+                                @endif
+                                @if($thread->protein_reference)
+                                    <span class="inline-flex items-center gap-1 border border-signal-violet/40 bg-signal-violet/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-violet">catálogo</span>
+                                @endif
+                                @if($thread->predictedJob)
+                                    <span class="inline-flex items-center gap-1 border border-signal-mint/40 bg-signal-mint/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-mint-deep">
+                                        {{ $thread->predictedJob->displayName() }}
+                                    </span>
+                                @endif
+                            </div>
+                            <h3 class="font-serif text-base leading-tight text-ink-900 group-hover:text-signal-mint-deep sm:text-lg">
+                                {{ $thread->title }}
+                            </h3>
+                            <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <x-federated-author :author="$thread->author()" />
+                                <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                    {{ $thread->last_activity_at?->diffForHumans() ?? $thread->created_at->diffForHumans() }}
+                                </span>
+                            </div>
+                        </div>
+                        <span class="shrink-0 font-mono text-[11px] tabular-nums text-ink-700">
+                            {{ $thread->posts_count }} <span class="text-ink-400">resp.</span>
+                        </span>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+
+        <div class="mt-6 sm:hidden">
+            <a href="{{ route('forum.index') }}" class="btn-secondary w-full justify-center">
+                ver todo el foro →
+            </a>
+        </div>
+    </div>
+</section>
+@endif
+
 {{-- ───────────────────────── GLOSARIO ───────────────────────── --}}
 <section>
     <div class="mx-auto grid max-w-[1400px] gap-8 px-4 py-12 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-12 lg:gap-16 lg:px-8">

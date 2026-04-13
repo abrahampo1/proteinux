@@ -435,6 +435,81 @@
             </a>
         </div>
     </div>
+
+    {{-- ─────────── DISCUSIONES ─────────── --}}
+    <section class="mt-10 border-t border-ink-300 pt-8 sm:mt-12 sm:pt-10">
+        <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <div class="label-tag">discusiones</div>
+                <h2 class="mt-2 font-serif text-xl text-ink-900 sm:text-2xl">Hilos del foro</h2>
+                <p class="mt-1 font-serif text-sm text-ink-600">
+                    {{ $threadCount }} {{ $threadCount === 1 ? 'discusión vinculada' : 'discusiones vinculadas' }} a esta predicción.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                @auth
+                    @if($libraryEntry)
+                        <a href="{{ route('forum.create', ['predicted_job_id' => $libraryEntry->id]) }}" class="btn-primary">
+                            + nuevo hilo
+                        </a>
+                    @endif
+                @endauth
+                @if($threadCount > 5)
+                    <a href="{{ route('forum.index', ['job' => $jobId]) }}" class="btn-secondary">
+                        ver todos →
+                    </a>
+                @endif
+            </div>
+        </div>
+
+        @if($threads->isEmpty())
+            <div class="border border-dashed border-ink-300 bg-ink-100/50 px-6 py-10 text-center">
+                <p class="font-serif text-sm text-ink-600">
+                    Aún no hay discusiones sobre esta predicción.
+                    @auth
+                        @if($libraryEntry)
+                            <a href="{{ route('forum.create', ['predicted_job_id' => $libraryEntry->id]) }}" class="font-mono text-signal-mint hover:underline">Inicia la primera →</a>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="font-mono text-signal-mint hover:underline">Inicia sesión</a> para crear un hilo.
+                    @endauth
+                </p>
+            </div>
+        @else
+            <div class="space-y-3">
+                @foreach($threads as $thread)
+                    <a href="{{ route('forum.show', $thread) }}"
+                       class="group block border border-ink-300 bg-ink-100/60 p-4 transition-all hover:border-signal-mint/60 hover:bg-ink-100">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-serif text-base leading-tight text-ink-900 group-hover:text-signal-mint-deep">
+                                    {{ $thread->title }}
+                                </h3>
+                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                    <x-federated-author :author="$thread->author()" />
+                                    <span class="font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                                        {{ $thread->created_at->format('Y-m-d') }}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="shrink-0 font-mono text-[11px] tabular-nums text-ink-700">
+                                {{ $thread->posts_count }} <span class="text-ink-400">resp.</span>
+                            </span>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            @if($threadCount > 5)
+                <div class="mt-4 text-center">
+                    <a href="{{ route('forum.index', ['job' => $jobId]) }}"
+                       class="font-mono text-[11px] uppercase tracking-wider text-signal-mint transition-colors hover:text-signal-mint-deep">
+                        ver las {{ $threadCount }} discusiones →
+                    </a>
+                </div>
+            @endif
+        @endif
+    </section>
 </div>
 @endsection
 

@@ -5,9 +5,17 @@
 @section('content')
 <div class="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
 
-    {{-- Navegaci&#243;n --}}
-    <div class="mb-6 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 sm:mb-8">
-        <a href="{{ route('forum.index') }}" class="transition-colors hover:text-signal-mint">&larr; volver al foro</a>
+    {{-- Navegación con migas de pan --}}
+    <div class="mb-6 flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 sm:mb-8">
+        <a href="{{ route('home') }}" class="transition-colors hover:text-signal-mint">inicio</a>
+        <span class="text-ink-400">/</span>
+        <a href="{{ route('forum.index') }}" class="transition-colors hover:text-signal-mint">foro</a>
+        @if($thread->protein_reference)
+            <span class="text-ink-400">/</span>
+            <a href="{{ route('forum.index', ['protein_ref' => $thread->protein_reference]) }}" class="transition-colors hover:text-signal-mint">{{ $thread->protein_reference }}</a>
+        @endif
+        <span class="text-ink-400">/</span>
+        <span class="truncate text-ink-700">{{ Str::limit($thread->title, 40) }}</span>
     </div>
 
     {{-- Cabecera del hilo --}}
@@ -22,6 +30,12 @@
                 <span class="inline-flex items-center gap-1 border border-ink-400/60 bg-ink-200/50 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-ink-600">
                     cerrado
                 </span>
+            @endif
+            @if($thread->protein_reference)
+                <a href="{{ route('proteins.show', $thread->protein_reference) }}"
+                   class="inline-flex items-center gap-1 border border-signal-violet/40 bg-signal-violet/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-violet transition-colors hover:bg-signal-violet/10">
+                    catálogo · {{ $thread->protein_reference }}
+                </a>
             @endif
             <x-origin-badge :domain="$thread->origin_domain" />
         </div>
@@ -57,7 +71,7 @@
 
                 @if($posts->total() === 0)
                     <div class="border border-dashed border-ink-300 bg-ink-100/50 px-6 py-10 text-center">
-                        <p class="font-serif text-sm text-ink-600">A&#250;n no hay respuestas. S&#233; el primero en participar.</p>
+                        <p class="font-serif text-sm text-ink-600">Aún no hay respuestas. Sé el primero en participar.</p>
                     </div>
                 @else
                     <div class="space-y-4">
@@ -87,21 +101,21 @@
                             @error('body')
                                 <p class="mb-2 font-mono text-[11px] uppercase tracking-wider text-signal-rust">! {{ $message }}</p>
                             @enderror
-                            <button type="submit" class="btn-primary">&rarr; publicar respuesta</button>
+                            <button type="submit" class="btn-primary">→ publicar respuesta</button>
                         </form>
                     </div>
                 @else
                     <div class="mt-8 border border-dashed border-ink-300 bg-ink-100/50 px-6 py-6 text-center">
                         <p class="font-mono text-[11px] uppercase tracking-wider text-ink-500">
-                            este hilo est&#225; cerrado y no acepta m&#225;s respuestas
+                            este hilo está cerrado y no acepta más respuestas
                         </p>
                     </div>
                 @endif
             @else
                 <div class="mt-8 border border-dashed border-ink-300 bg-ink-100/50 px-6 py-6 text-center">
                     <p class="font-serif text-sm text-ink-600">
-                        <a href="{{ route('login') }}" class="font-mono text-signal-mint hover:underline">Inicia sesi&#243;n</a>
-                        para participar en la discusi&#243;n.
+                        <a href="{{ route('login') }}" class="font-mono text-signal-mint hover:underline">Inicia sesión</a>
+                        para participar en la discusión.
                     </p>
                 </div>
             @endauth
@@ -109,10 +123,10 @@
 
         {{-- Barra lateral --}}
         <aside class="lg:col-span-4">
-            {{-- Prote&#237;na vinculada --}}
+            {{-- Proteína vinculada --}}
             @if($thread->predictedJob)
                 <div class="panel p-4 sm:p-5">
-                    <div class="label-tag mb-3">prote&#237;na vinculada</div>
+                    <div class="label-tag mb-3">predicción vinculada</div>
                     <h3 class="font-serif text-base leading-tight text-ink-900">
                         {{ $thread->predictedJob->displayName() }}
                     </h3>
@@ -145,13 +159,29 @@
 
                     <a href="{{ route('jobs.show', $thread->predictedJob->job_id) }}"
                        class="btn-primary mt-4 w-full justify-center">
-                        ver predicci&#243;n
+                        ver predicción
+                    </a>
+                </div>
+            @endif
+
+            {{-- Proteína del catálogo --}}
+            @if($thread->protein_reference)
+                <div class="panel {{ $thread->predictedJob ? 'mt-4' : '' }} p-4 sm:p-5">
+                    <div class="label-tag mb-3">proteína del catálogo</div>
+                    <p class="font-mono text-sm text-ink-900">{{ $thread->protein_reference }}</p>
+                    <a href="{{ route('proteins.show', $thread->protein_reference) }}"
+                       class="btn-secondary mt-3 w-full justify-center">
+                        ver en catálogo
+                    </a>
+                    <a href="{{ route('forum.index', ['protein_ref' => $thread->protein_reference]) }}"
+                       class="mt-2 block text-center font-mono text-[10px] uppercase tracking-wider text-ink-500 transition-colors hover:text-signal-mint">
+                        ver todos los hilos de esta proteína
                     </a>
                 </div>
             @endif
 
             {{-- Info del hilo --}}
-            <div class="panel mt-4 p-4 sm:p-5">
+            <div class="panel {{ ($thread->predictedJob || $thread->protein_reference) ? 'mt-4' : '' }} p-4 sm:p-5">
                 <div class="label-tag mb-3">info del hilo</div>
                 <dl class="space-y-0 font-mono text-[11px] text-ink-700">
                     <div class="field">
@@ -164,7 +194,7 @@
                     </div>
                     @if($thread->last_activity_at)
                         <div class="field">
-                            <dt>&#250;lt. actividad</dt>
+                            <dt>últ. actividad</dt>
                             <dd>{{ $thread->last_activity_at->diffForHumans() }}</dd>
                         </div>
                     @endif
@@ -180,7 +210,7 @@
     </div>
 
     <p class="mt-10 border-t border-ink-300 pt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-500">
-        &middot; hilo federado &mdash; las respuestas pueden provenir de instancias conectadas
+        · hilo federado — las respuestas pueden provenir de instancias conectadas
     </p>
 </div>
 @endsection

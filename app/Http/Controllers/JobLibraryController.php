@@ -23,9 +23,12 @@ class JobLibraryController extends Controller
     public function index(Request $request, JobLibrary $library, CesgaApiService $api): View
     {
         $search = trim((string) $request->query('q', ''));
+        $source = $request->query('source', 'all');
 
         /** @var LengthAwarePaginator<int, PredictedJob> $jobs */
         $jobs = PredictedJob::query()
+            ->when($source === 'local', fn ($q) => $q->where('is_remote', false))
+            ->when($source === 'federated', fn ($q) => $q->where('is_remote', true))
             ->when($search !== '', function ($q) use ($search) {
                 $like = '%'.$search.'%';
                 $q->where(function ($inner) use ($like) {
@@ -68,7 +71,14 @@ class JobLibraryController extends Controller
         $total = PredictedJob::count();
         $completed = PredictedJob::whereNotNull('completed_at')->count();
 
-        return view('library.index', compact('jobs', 'search', 'total', 'completed'));
+        return view('library.index', compact('jobs', 'search', 'source', 'total', 'completed'));
+    }
+
+    public function share(PredictedJob $predictedJob, JobLibrary $library): RedirectResponse
+    {
+        $library->shareEntry($predictedJob);
+
+        return back()->with('success', 'Prediccion compartida con las instancias federadas.');
     }
 
     public function rerun(PredictedJob $predictedJob, CesgaApiService $api): RedirectResponse

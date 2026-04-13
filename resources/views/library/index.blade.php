@@ -25,14 +25,31 @@
         </div>
     </header>
 
+    {{-- Filtro de origen --}}
+    <div class="mb-4 flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em]">
+        <a href="{{ route('library.index', array_merge(request()->only('q'), ['source' => 'all'])) }}"
+           class="px-3 py-1.5 border transition-colors {{ ($source ?? 'all') === 'all' ? 'border-signal-mint bg-signal-mint/10 text-signal-mint-deep' : 'border-ink-300 text-ink-600 hover:text-ink-900' }}">
+            todos
+        </a>
+        <a href="{{ route('library.index', array_merge(request()->only('q'), ['source' => 'local'])) }}"
+           class="px-3 py-1.5 border transition-colors {{ ($source ?? 'all') === 'local' ? 'border-signal-mint bg-signal-mint/10 text-signal-mint-deep' : 'border-ink-300 text-ink-600 hover:text-ink-900' }}">
+            local
+        </a>
+        <a href="{{ route('library.index', array_merge(request()->only('q'), ['source' => 'federated'])) }}"
+           class="px-3 py-1.5 border transition-colors {{ ($source ?? 'all') === 'federated' ? 'border-signal-mint bg-signal-mint/10 text-signal-mint-deep' : 'border-ink-300 text-ink-600 hover:text-ink-900' }}">
+            federado
+        </a>
+    </div>
+
     {{-- Buscador --}}
     <form action="{{ route('library.index') }}" method="GET" class="mb-6 flex flex-wrap items-center gap-2 sm:mb-8">
+        <input type="hidden" name="source" value="{{ $source ?? 'all' }}">
         <input type="search" name="q" value="{{ $search }}"
                placeholder="buscar por nombre, organismo, UniProt o PDB"
                class="input-lab flex-1 min-w-[260px]">
         <button type="submit" class="btn-primary">buscar</button>
         @if($search !== '')
-            <a href="{{ route('library.index') }}" class="btn-secondary">limpiar</a>
+            <a href="{{ route('library.index', ['source' => $source ?? 'all']) }}" class="btn-secondary">limpiar</a>
         @endif
     </form>
 
@@ -74,7 +91,12 @@
                 @endphp
                 <article class="panel flex flex-col p-4 sm:p-5">
                     <div class="mb-3 flex items-start justify-between gap-2">
-                        <span class="label-tag">§ {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="label-tag">§ {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                            @if($entry->isRemote())
+                                <x-origin-badge :domain="$entry->origin_domain" />
+                            @endif
+                        </div>
                         <span class="inline-flex items-center gap-1.5 border px-2 py-1 font-mono text-[10px] uppercase tracking-wider {{ $badgeCls }}">
                             <span class="status-dot" style="background:currentColor"></span>
                             @if($score !== null)
@@ -120,17 +142,35 @@
                     </dl>
 
                     <div class="mt-auto flex flex-wrap gap-2 pt-4">
-                        <a href="{{ route('jobs.show', $entry->job_id) }}"
-                           class="btn-primary flex-1 justify-center">
-                            ver resultado
-                        </a>
-                        <form action="{{ route('library.rerun', $entry) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn-secondary"
-                                    onclick="return confirm('¿Relanzar esta predicción? Consumirá GPU nueva en el CESGA.')">
-                                ↻ de nuevo
-                            </button>
-                        </form>
+                        @if(! $entry->isRemote())
+                            <a href="{{ route('jobs.show', $entry->job_id) }}"
+                               class="btn-primary flex-1 justify-center">
+                                ver resultado
+                            </a>
+                            <form action="{{ route('library.rerun', $entry) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-secondary"
+                                        onclick="return confirm('¿Relanzar esta predicción? Consumirá GPU nueva en el CESGA.')">
+                                    ↻ de nuevo
+                                </button>
+                            </form>
+                            @auth
+                                @if(! $entry->isShared())
+                                    <form action="{{ route('library.share', $entry) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-secondary" title="Compartir con instancias federadas">
+                                            compartir
+                                        </button>
+                                    </form>
+                                @else
+                                    <span class="btn-secondary opacity-50 cursor-default">compartida</span>
+                                @endif
+                            @endauth
+                        @else
+                            <span class="btn-secondary flex-1 justify-center text-center opacity-60 cursor-default">
+                                remoto · {{ $entry->origin_domain }}
+                            </span>
+                        @endif
                     </div>
                 </article>
             @endforeach

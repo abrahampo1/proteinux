@@ -2,6 +2,7 @@
 
 use App\Exceptions\CesgaApiException;
 use App\Models\PredictedJob;
+use App\Models\User;
 use App\Services\CesgaApiService;
 use App\Services\JobLibrary;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -92,7 +93,7 @@ it('redirects to the existing job when a known FASTA is re-submitted', function 
 
     app(JobLibrary::class)->registerSubmission($this->fastaHemo, 'existing-123');
 
-    $response = $this->post('/jobs', [
+    $response = $this->actingAs(User::factory()->create())->post('/jobs', [
         'fasta_sequence' => $this->fastaHemo,
         'fasta_filename' => 'hemo.fasta',
     ]);
@@ -113,7 +114,7 @@ it('bypasses the library when force=1 is sent', function () {
 
     app(JobLibrary::class)->registerSubmission($this->fastaHemo, 'old-123');
 
-    $this->post('/jobs', [
+    $this->actingAs(User::factory()->create())->post('/jobs', [
         'fasta_sequence' => $this->fastaHemo,
         'fasta_filename' => 'hemo.fasta',
         'force' => '1',
@@ -132,7 +133,7 @@ it('falls through to a fresh submission when the cached job is stale in CESGA', 
 
     app(JobLibrary::class)->registerSubmission($this->fastaHemo, 'stale-1');
 
-    $this->post('/jobs', [
+    $this->actingAs(User::factory()->create())->post('/jobs', [
         'fasta_sequence' => $this->fastaHemo,
         'fasta_filename' => 'hemo.fasta',
     ])->assertRedirect('/jobs/fresh-2');
@@ -225,7 +226,7 @@ it('reruns a library entry with the stored FASTA', function () {
 
     $row = app(JobLibrary::class)->registerSubmission($this->fastaHemo, 'old-1', 'hemo.fasta');
 
-    $this->post('/biblioteca/'.$row->id.'/rerun')
+    $this->actingAs(User::factory()->create())->post('/biblioteca/'.$row->id.'/rerun')
         ->assertRedirect('/jobs/rerun-99');
 
     $row->refresh();

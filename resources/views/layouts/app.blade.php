@@ -62,34 +62,41 @@
                 </a>
 
                 {{-- Enlaces en desktop/tablet --}}
-                <div class="hidden items-center gap-1 md:flex">
+                <div class="hidden items-center gap-0.5 md:flex">
                     <a href="{{ route('home') }}"
-                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('home') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                       class="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('home') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / inicio
                     </a>
                     <a href="{{ route('proteins.index') }}"
-                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                       class="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('proteins.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / catálogo
                     </a>
                     <a href="{{ route('library.index') }}"
-                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('library.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                       class="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('library.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / biblioteca
                     </a>
                     <a href="{{ route('forum.index') }}"
-                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('forum.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                       class="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('forum.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / foro
                     </a>
+
+                    <span class="mx-1 h-4 border-l border-ink-300"></span>
+
                     <a href="{{ route('documents.index') }}"
-                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('documents.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
-                        / documentos
+                       class="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('documents.*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                        / docs
                     </a>
                     <a href="{{ route('settings.ai') }}"
-                       class="px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
+                       class="px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('settings.ai*') ? 'text-signal-mint' : 'text-ink-700 hover:text-ink-900' }}">
                         / ajustes ia
                     </a>
 
+                    <a href="{{ route('jobs.create') }}" class="ml-2 btn-primary !py-1.5 !text-[10px]">
+                        &rarr; enviar secuencia
+                    </a>
+
                     @auth
-                        <div class="ml-3 flex items-center gap-2">
+                        <div class="ml-2 flex items-center gap-2">
                             <span class="font-mono text-[10px] text-ink-600">{{ auth()->user()->federatedId() }}</span>
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
@@ -97,7 +104,7 @@
                             </form>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="ml-3 btn-primary">
+                        <a href="{{ route('login') }}" class="ml-2 btn-secondary !py-1.5 !text-[10px]">
                             acceder
                         </a>
                     @endauth
@@ -122,6 +129,13 @@
             {{-- Panel móvil desplegable --}}
             <div id="mobile-menu" class="hidden border-t border-ink-300 pb-4 pt-2 md:hidden">
                 <div class="flex flex-col gap-1">
+                    {{-- CTA principal --}}
+                    <a href="{{ route('jobs.create') }}" class="btn-primary mx-3 mt-2 mb-3 justify-center">
+                        &rarr; enviar secuencia
+                    </a>
+
+                    {{-- Plataforma --}}
+                    <span class="px-3 pt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-ink-400">plataforma</span>
                     <a href="{{ route('home') }}"
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('home') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / inicio
@@ -138,6 +152,9 @@
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('forum.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / foro
                     </a>
+
+                    {{-- Herramientas --}}
+                    <span class="px-3 pt-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink-400">herramientas</span>
                     <a href="{{ route('documents.index') }}"
                        class="border-l-2 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.14em] transition-colors {{ request()->routeIs('documents.*') ? 'border-signal-mint text-signal-mint' : 'border-transparent text-ink-700 hover:border-ink-400 hover:text-ink-900' }}">
                         / documentos
@@ -156,7 +173,7 @@
                             </form>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="mt-2 btn-primary w-full justify-center">
+                        <a href="{{ route('login') }}" class="mt-2 mx-3 btn-secondary w-full justify-center">
                             acceder
                         </a>
                     @endauth

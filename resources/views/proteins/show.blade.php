@@ -136,6 +136,14 @@
                         </div>
                     </div>
                 @endif
+
+                <div class="mt-6 border-t border-ink-300 pt-4">
+                    <div class="label-tag mb-3">comunidad</div>
+                    <a href="{{ route('forum.create', ['protein_name' => $protein['protein_name'] ?? '', 'organism' => $protein['organism'] ?? '']) }}"
+                       class="flex w-full items-center justify-center gap-1 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                        + iniciar discusi&oacute;n
+                    </a>
+                </div>
             </div>
         </aside>
     </div>

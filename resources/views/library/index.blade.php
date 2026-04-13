@@ -141,7 +141,21 @@
                         </div>
                     </dl>
 
-                    <div class="mt-auto flex flex-wrap gap-2 pt-4">
+                    {{-- Discusiones --}}
+                    <div class="mt-4 flex items-center justify-between border-t border-dashed border-ink-300 pt-3">
+                        <a href="{{ route('forum.index', ['protein' => $entry->id]) }}"
+                           class="font-mono text-[10px] uppercase tracking-wider text-ink-600 transition-colors hover:text-signal-mint">
+                            <span class="tabular-nums text-ink-900">{{ $entry->forum_threads_count }}</span> {{ $entry->forum_threads_count === 1 ? 'hilo' : 'hilos' }}
+                        </a>
+                        @auth
+                            <a href="{{ route('forum.create', ['predicted_job_id' => $entry->id]) }}"
+                               class="font-mono text-[10px] uppercase tracking-wider text-signal-mint transition-colors hover:text-signal-mint-deep">
+                                + discutir
+                            </a>
+                        @endauth
+                    </div>
+
+                    <div class="mt-auto flex flex-wrap gap-2 pt-3">
                         @if(! $entry->isRemote())
                             <a href="{{ route('jobs.show', $entry->job_id) }}"
                                class="btn-primary flex-1 justify-center">

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Forum\ForumThread;
 use App\Models\Scientific\ScientificDocument;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PredictedJob extends Model
 {
@@ -46,6 +48,11 @@ class PredictedJob extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function forumThreads(): HasMany
+    {
+        return $this->hasMany(ForumThread::class);
     }
 
     public function scientificDocuments(): BelongsToMany

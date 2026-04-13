@@ -26,15 +26,23 @@ class ForumThreadController extends Controller
             $query->where('predicted_job_id', $proteinId);
         }
 
+        $filter = $request->query('filter', 'all');
+        if ($filter === 'with_protein') {
+            $query->whereNotNull('predicted_job_id');
+        } elseif ($filter === 'without_protein') {
+            $query->whereNull('predicted_job_id');
+        }
+
         $threads = $query->paginate(20)->withQueryString();
 
         return view('forum.index', [
             'threads' => $threads,
             'search' => $search,
+            'filter' => $filter,
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $predictedJobs = PredictedJob::whereNotNull('completed_at')
             ->orderByDesc('completed_at')
@@ -42,6 +50,9 @@ class ForumThreadController extends Controller
 
         return view('forum.create', [
             'predictedJobs' => $predictedJobs,
+            'preselectedJobId' => $request->query('predicted_job_id'),
+            'prefillProteinName' => $request->query('protein_name'),
+            'prefillOrganism' => $request->query('organism'),
         ]);
     }
 

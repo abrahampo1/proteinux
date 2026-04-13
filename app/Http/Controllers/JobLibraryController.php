@@ -26,7 +26,7 @@ class JobLibraryController extends Controller
         $source = $request->query('source', 'all');
 
         /** @var LengthAwarePaginator<int, PredictedJob> $jobs */
-        $jobs = PredictedJob::query()
+        $jobs = PredictedJob::withCount('forumThreads')
             ->when($source === 'local', fn ($q) => $q->where('is_remote', false))
             ->when($source === 'federated', fn ($q) => $q->where('is_remote', true))
             ->when($search !== '', function ($q) use ($search) {

@@ -22,7 +22,7 @@
         <fieldset>
             <legend class="label-tag mb-2">&sect; 1 &mdash; t&#237;tulo</legend>
             <input type="text" name="title" id="title"
-                   value="{{ old('title') }}"
+                   value="{{ old('title', $prefillProteinName ? 'Discusión: ' . $prefillProteinName . ($prefillOrganism ? ' (' . $prefillOrganism . ')' : '') : '') }}"
                    class="input-lab @error('title') !border-signal-rust @enderror"
                    placeholder="T&#237;tulo del hilo"
                    required>
@@ -48,7 +48,7 @@
             <select name="predicted_job_id" id="predicted_job_id" class="input-lab">
                 <option value="">&mdash; sin vincular a predicci&#243;n &mdash;</option>
                 @foreach($predictedJobs as $job)
-                    <option value="{{ $job->id }}" @selected(old('predicted_job_id') == $job->id)>
+                    <option value="{{ $job->id }}" @selected(old('predicted_job_id', $preselectedJobId) == $job->id)>
                         {{ $job->displayName() }} &middot; {{ $job->organism ?? 'sin organismo' }}
                     </option>
                 @endforeach

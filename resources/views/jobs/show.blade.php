@@ -348,6 +348,34 @@
                     </div>
                 </section>
 
+                {{-- Discusiones vinculadas --}}
+                <section class="panel p-4 sm:p-5">
+                    <div class="label-tag mb-4">discusiones</div>
+                    @if($relatedThreads->isNotEmpty())
+                        <ul class="space-y-2">
+                            @foreach($relatedThreads as $relThread)
+                                <li>
+                                    <a href="{{ route('forum.show', $relThread) }}"
+                                       class="flex items-start justify-between gap-2 border-b border-dashed border-ink-300 pb-2 font-mono text-[11px] text-ink-700 transition-colors hover:text-signal-mint">
+                                        <span class="line-clamp-2 leading-relaxed">{{ $relThread->title }}</span>
+                                        <span class="shrink-0 tabular-nums text-ink-400">{{ $relThread->posts_count }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="font-mono text-[11px] text-ink-400">sin discusiones a&uacute;n</p>
+                    @endif
+                    @auth
+                        @if(isset($libraryEntry) && $libraryEntry)
+                            <a href="{{ route('forum.create', ['predicted_job_id' => $libraryEntry->id]) }}"
+                               class="mt-3 flex w-full items-center justify-center gap-1 border border-ink-300 bg-ink-50 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wider text-ink-700 transition-colors hover:border-signal-mint hover:text-signal-mint-deep">
+                                + iniciar discusi&oacute;n
+                            </a>
+                        @endif
+                    @endauth
+                </section>
+
                 <a href="{{ route('jobs.create') }}" class="btn-secondary block w-full justify-center text-center">
                     + nuevo envío
                 </a>

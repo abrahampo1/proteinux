@@ -23,15 +23,32 @@
         </div>
     </header>
 
+    {{-- Filtro por tipo --}}
+    <div class="mb-4 flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em]">
+        <a href="{{ route('forum.index', array_merge(request()->only('q'), ['filter' => 'all'])) }}"
+           class="px-3 py-1.5 border transition-colors {{ ($filter ?? 'all') === 'all' ? 'border-signal-mint bg-signal-mint/10 text-signal-mint-deep' : 'border-ink-300 text-ink-600 hover:text-ink-900' }}">
+            todos
+        </a>
+        <a href="{{ route('forum.index', array_merge(request()->only('q'), ['filter' => 'with_protein'])) }}"
+           class="px-3 py-1.5 border transition-colors {{ ($filter ?? 'all') === 'with_protein' ? 'border-signal-mint bg-signal-mint/10 text-signal-mint-deep' : 'border-ink-300 text-ink-600 hover:text-ink-900' }}">
+            con prote&#237;na
+        </a>
+        <a href="{{ route('forum.index', array_merge(request()->only('q'), ['filter' => 'without_protein'])) }}"
+           class="px-3 py-1.5 border transition-colors {{ ($filter ?? 'all') === 'without_protein' ? 'border-signal-mint bg-signal-mint/10 text-signal-mint-deep' : 'border-ink-300 text-ink-600 hover:text-ink-900' }}">
+            sin vincular
+        </a>
+    </div>
+
     {{-- Buscador y acciones --}}
     <div class="mb-6 flex flex-wrap items-center gap-2 sm:mb-8">
         <form action="{{ route('forum.index') }}" method="GET" class="flex flex-1 items-center gap-2">
+            <input type="hidden" name="filter" value="{{ $filter ?? 'all' }}">
             <input type="search" name="q" value="{{ $search }}"
                    placeholder="buscar por t&#237;tulo"
                    class="input-lab min-w-[200px] flex-1">
             <button type="submit" class="btn-primary">buscar</button>
             @if($search !== '')
-                <a href="{{ route('forum.index') }}" class="btn-secondary">limpiar</a>
+                <a href="{{ route('forum.index', ['filter' => $filter ?? 'all']) }}" class="btn-secondary">limpiar</a>
             @endif
         </form>
         @auth

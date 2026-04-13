@@ -167,13 +167,123 @@
     </div>
 </section>
 
+{{-- ───────────────────────── ACTIVIDAD RECIENTE ───────────────────────── --}}
+@if($recentThreads->isNotEmpty() || $recentPredictions->isNotEmpty())
+<section class="border-b border-ink-300">
+    <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+            <div class="lg:col-span-3">
+                <div class="label-tag">sección 03 · comunidad</div>
+                <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Actividad reciente</h2>
+                <p class="mt-4 font-serif text-sm leading-relaxed text-ink-600">
+                    Últimas discusiones y predicciones completadas por la comunidad.
+                    La plataforma es colaborativa y federada.
+                </p>
+            </div>
+
+            <div class="grid gap-8 sm:grid-cols-2 lg:col-span-9">
+                {{-- Últimos hilos --}}
+                @if($recentThreads->isNotEmpty())
+                <div>
+                    <div class="mb-4 flex items-center justify-between">
+                        <span class="label-tag">discusiones</span>
+                        <a href="{{ route('forum.index') }}" class="font-mono text-[10px] uppercase tracking-wider text-signal-mint transition-colors hover:text-signal-mint-deep">
+                            ver todas &rarr;
+                        </a>
+                    </div>
+                    <div class="space-y-3">
+                        @foreach($recentThreads as $thread)
+                            <a href="{{ route('forum.show', $thread) }}"
+                               class="block border border-ink-300 bg-ink-100/60 p-4 transition-colors hover:border-signal-mint/60 hover:bg-ink-100">
+                                <h3 class="font-serif text-sm leading-tight text-ink-900 sm:text-base">{{ $thread->title }}</h3>
+                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                    <span class="font-mono text-[10px] text-ink-600">{{ $thread->authorDisplayName() }}</span>
+                                    <span class="font-mono text-[10px] tabular-nums text-ink-400">{{ $thread->posts_count }} resp.</span>
+                                    @if($thread->last_activity_at)
+                                        <span class="font-mono text-[10px] text-ink-400">{{ $thread->last_activity_at->diffForHumans() }}</span>
+                                    @endif
+                                </div>
+                                @if($thread->predictedJob)
+                                    <span class="mt-2 inline-flex items-center gap-1 border border-signal-mint/40 bg-signal-mint/5 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-widest text-signal-mint-deep">
+                                        <span class="status-dot bg-signal-mint"></span>
+                                        {{ $thread->predictedJob->displayName() }}
+                                    </span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Últimas predicciones --}}
+                @if($recentPredictions->isNotEmpty())
+                <div>
+                    <div class="mb-4 flex items-center justify-between">
+                        <span class="label-tag">predicciones</span>
+                        <a href="{{ route('library.index') }}" class="font-mono text-[10px] uppercase tracking-wider text-signal-mint transition-colors hover:text-signal-mint-deep">
+                            ver todas &rarr;
+                        </a>
+                    </div>
+                    <div class="space-y-3">
+                        @foreach($recentPredictions as $prediction)
+                            @php
+                                $score = $prediction->plddt_mean;
+                                if ($score === null) {
+                                    $badgeCls = 'border-ink-300 bg-ink-100/60 text-ink-500';
+                                    $badgeLabel = 'en proceso';
+                                } elseif ($score >= 90) {
+                                    $badgeCls = 'border-[#0053D6]/60 bg-[#0053D6]/10 text-[#0053D6]';
+                                    $badgeLabel = 'muy alta';
+                                } elseif ($score >= 70) {
+                                    $badgeCls = 'border-sky-500/60 bg-sky-50 text-sky-700';
+                                    $badgeLabel = 'alta';
+                                } elseif ($score >= 50) {
+                                    $badgeCls = 'border-amber-500/60 bg-amber-50 text-amber-700';
+                                    $badgeLabel = 'media';
+                                } else {
+                                    $badgeCls = 'border-orange-500/60 bg-orange-50 text-orange-700';
+                                    $badgeLabel = 'baja';
+                                }
+                            @endphp
+                            <a href="{{ route('jobs.show', $prediction->job_id) }}"
+                               class="block border border-ink-300 bg-ink-100/60 p-4 transition-colors hover:border-signal-mint/60 hover:bg-ink-100">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="font-serif text-sm leading-tight text-ink-900 sm:text-base">{{ $prediction->displayName() }}</h3>
+                                        @if($prediction->organism)
+                                            <p class="mt-1 font-serif text-[12px] italic text-ink-600">{{ $prediction->organism }}</p>
+                                        @endif
+                                    </div>
+                                    @if($score !== null)
+                                        <span class="inline-flex shrink-0 items-center gap-1 border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider {{ $badgeCls }}">
+                                            {{ number_format($score, 1) }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="mt-2 font-mono text-[10px] tabular-nums text-ink-400">
+                                    {{ $prediction->completed_at?->format('Y-m-d') }}
+                                    @if($prediction->sequence_length)
+                                        &middot; {{ $prediction->sequence_length }} aa
+                                    @endif
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</section>
+@endif
+
 {{-- ───────────────────────── TABLA DE MUESTRA ───────────────────────── --}}
 @if(!empty($samples))
 <section class="border-b border-ink-300">
     <div class="mx-auto max-w-[1400px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         <div class="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
             <div>
-                <div class="label-tag">sección 03 · conjunto de referencia</div>
+                <div class="label-tag">sección 04 · conjunto de referencia</div>
                 <h2 class="mt-3 font-serif text-2xl text-ink-900 sm:text-3xl">Pruébalo con una proteína conocida</h2>
                 <p class="mt-2 max-w-xl font-serif text-sm text-ink-600">
                     Entradas curadas con referencias cruzadas verificadas a UniProt y PDB.
